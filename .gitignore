@@ -1,3 +1,5 @@
+# Ignore large export zip file
+flutter_app_export.zip
 # Miscellaneous
 *.class
 *.log
