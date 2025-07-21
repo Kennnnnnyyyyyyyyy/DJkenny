@@ -1,0 +1,1126 @@
+.
+├── analysis_options.yaml
+├── android
+│   ├── app
+│   │   ├── build.gradle.kts
+│   │   └── src
+│   │       ├── debug
+│   │       │   └── AndroidManifest.xml
+│   │       ├── main
+│   │       │   ├── AndroidManifest.xml
+│   │       │   ├── java
+│   │       │   │   └── io
+│   │       │   │       └── flutter
+│   │       │   │           └── plugins
+│   │       │   │               └── GeneratedPluginRegistrant.java
+│   │       │   ├── kotlin
+│   │       │   │   └── com
+│   │       │   │       └── gnetsol
+│   │       │   │           └── music_app
+│   │       │   │               └── MainActivity.kt
+│   │       │   └── res
+│   │       │       ├── drawable
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── drawable-v21
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── mipmap-hdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-mdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── values
+│   │       │       │   └── styles.xml
+│   │       │       └── values-night
+│   │       │           └── styles.xml
+│   │       └── profile
+│   │           └── AndroidManifest.xml
+│   ├── build.gradle.kts
+│   ├── gradle
+│   │   └── wrapper
+│   │       ├── gradle-wrapper.jar
+│   │       └── gradle-wrapper.properties
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── local.properties
+│   ├── music_app_android.iml
+│   └── settings.gradle.kts
+├── assets
+│   ├── fonts
+│   │   ├── Boulder Regular.ttf
+│   │   ├── NatureBeautyPersonalUse-9Y2DK.ttf
+│   │   └── StylishCalligraphyDemo-XPZZ.ttf
+│   ├── images
+│   │   └── xyz.jpg
+│   └── IMG_3754.MOV
+├── flutter_structure.txt
+├── ios
+│   ├── Flutter
+│   │   ├── AppFrameworkInfo.plist
+│   │   ├── Debug.xcconfig
+│   │   ├── ephemeral
+│   │   │   ├── flutter_lldb_helper.py
+│   │   │   └── flutter_lldbinit
+│   │   ├── flutter_export_environment.sh
+│   │   ├── Flutter.podspec
+│   │   ├── Generated.xcconfig
+│   │   └── Release.xcconfig
+│   ├── Podfile
+│   ├── Podfile.lock
+│   ├── Pods
+│   │   ├── Headers
+│   │   ├── Local Podspecs
+│   │   │   ├── app_links.podspec.json
+│   │   │   ├── Flutter.podspec.json
+│   │   │   ├── path_provider_foundation.podspec.json
+│   │   │   ├── qonversion_flutter.podspec.json
+│   │   │   ├── shared_preferences_foundation.podspec.json
+│   │   │   ├── url_launcher_ios.podspec.json
+│   │   │   └── video_player_avfoundation.podspec.json
+│   │   ├── Manifest.lock
+│   │   ├── NoCodes
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   └── Sources
+│   │   │       ├── NoCodes
+│   │   │       │   ├── Assemblies
+│   │   │       │   │   ├── MiscAssembly.swift
+│   │   │       │   │   ├── NoCodesAssembly.swift
+│   │   │       │   │   ├── NoCodesViewsAssembly.swift
+│   │   │       │   │   └── ServicesAssembly.swift
+│   │   │       │   ├── Configuration.swift
+│   │   │       │   ├── Delegate.swift
+│   │   │       │   ├── Device
+│   │   │       │   │   ├── DeviceInfoCollector.swift
+│   │   │       │   │   └── DeviceInfoCollectorInterface.swift
+│   │   │       │   ├── Entities
+│   │   │       │   │   ├── Action.swift
+│   │   │       │   │   ├── Device.swift
+│   │   │       │   │   ├── NoCodesError.swift
+│   │   │       │   │   ├── NoCodesErrorType.swift
+│   │   │       │   │   ├── PresentationConfiguration.swift
+│   │   │       │   │   └── Screen.swift
+│   │   │       │   ├── Mappers
+│   │   │       │   │   ├── NoCodesMapper.swift
+│   │   │       │   │   └── NoCodesMapperInterface.swift
+│   │   │       │   ├── NetworkLayer
+│   │   │       │   │   ├── Entities
+│   │   │       │   │   │   ├── ApiError.swift
+│   │   │       │   │   │   └── EmptyApiResponse.swift
+│   │   │       │   │   ├── Error
+│   │   │       │   │   │   └── ErrorConstants.swift
+│   │   │       │   │   ├── HeadersBuilder
+│   │   │       │   │   │   ├── Header.swift
+│   │   │       │   │   │   ├── HeadersBuilder.swift
+│   │   │       │   │   │   └── HeadersBuilderInterface.swift
+│   │   │       │   │   ├── NetworkErrorHandler
+│   │   │       │   │   │   ├── NetworkErrorHandler.swift
+│   │   │       │   │   │   └── NetworkErrorHandlerInterface.swift
+│   │   │       │   │   ├── NetworkProvider
+│   │   │       │   │   │   ├── NetworkProvider.swift
+│   │   │       │   │   │   └── NetworkProviderInterface.swift
+│   │   │       │   │   ├── RateLimiter
+│   │   │       │   │   │   ├── RateLimiter.swift
+│   │   │       │   │   │   └── RateLimiterInterface.swift
+│   │   │       │   │   ├── Request
+│   │   │       │   │   │   ├── Request.swift
+│   │   │       │   │   │   └── RequestType.swift
+│   │   │       │   │   ├── RequestProcessor
+│   │   │       │   │   │   ├── RequestProcessor.swift
+│   │   │       │   │   │   └── RequestProcessorInterface.swift
+│   │   │       │   │   └── ResponseDecoder
+│   │   │       │   │       ├── ResponseDecoder.swift
+│   │   │       │   │       └── ResponseDecoderInterface.swift
+│   │   │       │   ├── NoCodes.h
+│   │   │       │   ├── NoCodes.swift
+│   │   │       │   ├── NoCodesFlowCoordinator.swift
+│   │   │       │   ├── NoCodesNavigationController.swift
+│   │   │       │   ├── NoCodesViewController.swift
+│   │   │       │   ├── Services
+│   │   │       │   │   ├── NoCodesService.swift
+│   │   │       │   │   └── NoCodesServiceInterface.swift
+│   │   │       │   ├── SkeletonView.swift
+│   │   │       │   └── Utils
+│   │   │       │       ├── LoggerWrapper.swift
+│   │   │       │       └── Utils.swift
+│   │   │       └── PrivacyInfo.xcprivacy
+│   │   ├── Pods.xcodeproj
+│   │   │   ├── project.pbxproj
+│   │   │   └── xcuserdata
+│   │   │       └── saieshsingh.xcuserdatad
+│   │   │           └── xcschemes
+│   │   │               ├── app_links-app_links_ios_privacy.xcscheme
+│   │   │               ├── app_links.xcscheme
+│   │   │               ├── Flutter.xcscheme
+│   │   │               ├── NoCodes-NoCodes.xcscheme
+│   │   │               ├── NoCodes.xcscheme
+│   │   │               ├── path_provider_foundation-path_provider_foundation_privacy.xcscheme
+│   │   │               ├── path_provider_foundation.xcscheme
+│   │   │               ├── Pods-Runner.xcscheme
+│   │   │               ├── Pods-RunnerTests.xcscheme
+│   │   │               ├── qonversion_flutter.xcscheme
+│   │   │               ├── Qonversion-Qonversion.xcscheme
+│   │   │               ├── Qonversion.xcscheme
+│   │   │               ├── QonversionSandwich.xcscheme
+│   │   │               ├── shared_preferences_foundation-shared_preferences_foundation_privacy.xcscheme
+│   │   │               ├── shared_preferences_foundation.xcscheme
+│   │   │               ├── url_launcher_ios-url_launcher_ios_privacy.xcscheme
+│   │   │               ├── url_launcher_ios.xcscheme
+│   │   │               ├── video_player_avfoundation-video_player_avfoundation_privacy.xcscheme
+│   │   │               ├── video_player_avfoundation.xcscheme
+│   │   │               └── xcschememanagement.plist
+│   │   ├── Qonversion
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   └── Sources
+│   │   │       ├── PrivacyInfo.xcprivacy
+│   │   │       ├── Qonversion
+│   │   │       │   ├── Automations
+│   │   │       │   │   ├── Constants
+│   │   │       │   │   │   ├── QONAutomationsConstants.h
+│   │   │       │   │   │   └── QONAutomationsConstants.m
+│   │   │       │   │   ├── Main
+│   │   │       │   │   │   ├── QONAutomationsActionsHandler
+│   │   │       │   │   │   │   ├── QONAutomationsActionsHandler.h
+│   │   │       │   │   │   │   └── QONAutomationsActionsHandler.m
+│   │   │       │   │   │   ├── QONAutomationsFlowAssembly
+│   │   │       │   │   │   │   ├── QONAutomationsFlowAssembly.h
+│   │   │       │   │   │   │   └── QONAutomationsFlowAssembly.m
+│   │   │       │   │   │   └── QONAutomationsFlowCoordinator
+│   │   │       │   │   │       ├── QONAutomationsFlowCoordinator.h
+│   │   │       │   │   │       └── QONAutomationsFlowCoordinator.m
+│   │   │       │   │   ├── Mappers
+│   │   │       │   │   │   ├── QONAutomationsEventsMapper
+│   │   │       │   │   │   │   ├── QONAutomationsEventsMapper.h
+│   │   │       │   │   │   │   └── QONAutomationsEventsMapper.m
+│   │   │       │   │   │   └── QONAutomationsMapper
+│   │   │       │   │   │       ├── QONAutomationsMapper.h
+│   │   │       │   │   │       └── QONAutomationsMapper.m
+│   │   │       │   │   ├── Models
+│   │   │       │   │   │   ├── QONAutomationsEvent+Protected.h
+│   │   │       │   │   │   ├── QONAutomationsScreen
+│   │   │       │   │   │   │   ├── QONAutomationsScreen.h
+│   │   │       │   │   │   │   └── QONAutomationsScreen.m
+│   │   │       │   │   │   ├── QONMacrosProcess
+│   │   │       │   │   │   │   ├── QONMacrosProcess.h
+│   │   │       │   │   │   │   └── QONMacrosProcess.m
+│   │   │       │   │   │   └── QONUserActionPoint
+│   │   │       │   │   │       ├── QONUserActionPoint.h
+│   │   │       │   │   │       └── QONUserActionPoint.m
+│   │   │       │   │   ├── Services
+│   │   │       │   │   │   ├── QONAutomationsScreenProcessor
+│   │   │       │   │   │   │   ├── QONAutomationsScreenProcessor.h
+│   │   │       │   │   │   │   └── QONAutomationsScreenProcessor.m
+│   │   │       │   │   │   └── QONAutomationsService
+│   │   │       │   │   │       ├── QONAutomationsService.h
+│   │   │       │   │   │       └── QONAutomationsService.m
+│   │   │       │   │   └── Views
+│   │   │       │   │       ├── QONAutomationsNavigationController
+│   │   │       │   │       │   ├── QONAutomationsNavigationController.h
+│   │   │       │   │       │   └── QONAutomationsNavigationController.m
+│   │   │       │   │       └── QONAutomationsViewController
+│   │   │       │   │           ├── QONAutomationsViewController.h
+│   │   │       │   │           └── QONAutomationsViewController.m
+│   │   │       │   ├── IDFA
+│   │   │       │   │   ├── QNDevice+Advertising.h
+│   │   │       │   │   └── QNDevice+Advertising.m
+│   │   │       │   ├── Public
+│   │   │       │   │   ├── QONActionResult.h
+│   │   │       │   │   ├── QONActionResult.m
+│   │   │       │   │   ├── QONAutomations.h
+│   │   │       │   │   ├── QONAutomations.m
+│   │   │       │   │   ├── QONAutomationsDelegate.h
+│   │   │       │   │   ├── QONAutomationsEvent.h
+│   │   │       │   │   ├── QONAutomationsEvent.m
+│   │   │       │   │   ├── QONAutomationsEventType.h
+│   │   │       │   │   ├── QONConfiguration.h
+│   │   │       │   │   ├── QONConfiguration.m
+│   │   │       │   │   ├── QONEntitlement.h
+│   │   │       │   │   ├── QONEntitlement.m
+│   │   │       │   │   ├── QONEntitlementsCacheLifetime.h
+│   │   │       │   │   ├── QONEntitlementsUpdateListener.h
+│   │   │       │   │   ├── QONEnvironment.h
+│   │   │       │   │   ├── QONErrors.h
+│   │   │       │   │   ├── QONErrors.m
+│   │   │       │   │   ├── QONExperiment.h
+│   │   │       │   │   ├── QONExperiment.m
+│   │   │       │   │   ├── QONExperimentGroup.h
+│   │   │       │   │   ├── QONExperimentGroup.m
+│   │   │       │   │   ├── QONIntroEligibility.h
+│   │   │       │   │   ├── QONIntroEligibility.m
+│   │   │       │   │   ├── QONLaunchMode.h
+│   │   │       │   │   ├── QONLaunchResult.h
+│   │   │       │   │   ├── QONLaunchResult.m
+│   │   │       │   │   ├── QONOffering.h
+│   │   │       │   │   ├── QONOffering.m
+│   │   │       │   │   ├── QONOfferings.h
+│   │   │       │   │   ├── QONOfferings.m
+│   │   │       │   │   ├── QONProduct.h
+│   │   │       │   │   ├── QONProduct.m
+│   │   │       │   │   ├── QONPromoPurchasesDelegate.h
+│   │   │       │   │   ├── QONPromotionalOffer.h
+│   │   │       │   │   ├── QONPromotionalOffer.m
+│   │   │       │   │   ├── QONPurchaseOptions.h
+│   │   │       │   │   ├── QONPurchaseOptions.m
+│   │   │       │   │   ├── QONRemoteConfig.h
+│   │   │       │   │   ├── QONRemoteConfig.m
+│   │   │       │   │   ├── QONRemoteConfigList.h
+│   │   │       │   │   ├── QONRemoteConfigList.m
+│   │   │       │   │   ├── QONRemoteConfigurationSource.h
+│   │   │       │   │   ├── QONRemoteConfigurationSource.m
+│   │   │       │   │   ├── QONScreenCustomizationDelegate.h
+│   │   │       │   │   ├── QONScreenPresentationConfiguration.h
+│   │   │       │   │   ├── QONScreenPresentationConfiguration.m
+│   │   │       │   │   ├── QONStoreKit2PurchaseModel.h
+│   │   │       │   │   ├── QONStoreKit2PurchaseModel.m
+│   │   │       │   │   ├── QONStoreKitSugare.h
+│   │   │       │   │   ├── QONStoreKitSugare.m
+│   │   │       │   │   ├── QONSubscriptionPeriod.h
+│   │   │       │   │   ├── QONSubscriptionPeriod.m
+│   │   │       │   │   ├── QONTransaction.h
+│   │   │       │   │   ├── QONTransaction.m
+│   │   │       │   │   ├── QONUser.h
+│   │   │       │   │   ├── QONUser.m
+│   │   │       │   │   ├── QONUserProperties.h
+│   │   │       │   │   ├── QONUserProperties.m
+│   │   │       │   │   ├── QONUserProperty.h
+│   │   │       │   │   ├── QONUserProperty.m
+│   │   │       │   │   ├── Qonversion.h
+│   │   │       │   │   └── Qonversion.m
+│   │   │       │   └── Qonversion
+│   │   │       │       ├── Assemblies
+│   │   │       │       │   └── QNServicesAssembly
+│   │   │       │       │       ├── QNServicesAssembly.h
+│   │   │       │       │       └── QNServicesAssembly.m
+│   │   │       │       ├── Constants
+│   │   │       │       │   ├── QNAPIConstants
+│   │   │       │       │   │   ├── QNAPIConstants.h
+│   │   │       │       │   │   └── QNAPIConstants.m
+│   │   │       │       │   └── QNInternalConstants
+│   │   │       │       │       ├── QNInternalConstants.h
+│   │   │       │       │       └── QNInternalConstants.m
+│   │   │       │       ├── Core
+│   │   │       │       │   ├── QNInMemoryStorage
+│   │   │       │       │   │   ├── QNInMemoryStorage.h
+│   │   │       │       │   │   └── QNInMemoryStorage.m
+│   │   │       │       │   ├── QNKeyedArchiver
+│   │   │       │       │   │   ├── QNKeyedArchiver.h
+│   │   │       │       │   │   └── QNKeyedArchiver.m
+│   │   │       │       │   ├── QNLocalStorage.h
+│   │   │       │       │   ├── QNRequestBuilder
+│   │   │       │       │   │   ├── QNRequestBuilder.h
+│   │   │       │       │   │   └── QNRequestBuilder.m
+│   │   │       │       │   ├── QNRequestSerializer
+│   │   │       │       │   │   ├── QNRequestSerializer.h
+│   │   │       │       │   │   └── QNRequestSerializer.m
+│   │   │       │       │   └── QNUserDefaultsStorage
+│   │   │       │       │       ├── QNUserDefaultsStorage.h
+│   │   │       │       │       └── QNUserDefaultsStorage.m
+│   │   │       │       ├── Main
+│   │   │       │       │   ├── QNAttributionManager
+│   │   │       │       │   │   ├── QNAttributionManager.h
+│   │   │       │       │   │   └── QNAttributionManager.m
+│   │   │       │       │   ├── QNIdentityManager
+│   │   │       │       │   │   ├── QNIdentityManager.h
+│   │   │       │       │   │   ├── QNIdentityManager.m
+│   │   │       │       │   │   └── QNIdentityManagerInterface.h
+│   │   │       │       │   ├── QNProductCenterManager
+│   │   │       │       │   │   ├── QNProductCenterManager.h
+│   │   │       │       │   │   └── QNProductCenterManager.m
+│   │   │       │       │   ├── QNUserPropertiesManager
+│   │   │       │       │   │   ├── QNUserPropertiesManager.h
+│   │   │       │       │   │   └── QNUserPropertiesManager.m
+│   │   │       │       │   └── QONRemoteConfigManager
+│   │   │       │       │       ├── QONRemoteConfigListRequestData.h
+│   │   │       │       │       ├── QONRemoteConfigListRequestData.m
+│   │   │       │       │       ├── QONRemoteConfigLoadingState.h
+│   │   │       │       │       ├── QONRemoteConfigLoadingState.m
+│   │   │       │       │       ├── QONRemoteConfigManager.h
+│   │   │       │       │       └── QONRemoteConfigManager.m
+│   │   │       │       ├── Mappers
+│   │   │       │       │   ├── QNErrorsMapper
+│   │   │       │       │   │   ├── QNErrorsMapper.h
+│   │   │       │       │   │   └── QNErrorsMapper.m
+│   │   │       │       │   ├── QNMapper
+│   │   │       │       │   │   ├── QNMapper.h
+│   │   │       │       │   │   └── QNMapper.m
+│   │   │       │       │   ├── QNUserInfoMapper
+│   │   │       │       │   │   ├── QNUserInfoMapper.h
+│   │   │       │       │   │   ├── QNUserInfoMapper.m
+│   │   │       │       │   │   └── QNUserInfoMapperInterface.h
+│   │   │       │       │   ├── QONFallbackMapper
+│   │   │       │       │   │   ├── QONFallbackMapper.h
+│   │   │       │       │   │   └── QONFallbackMapper.m
+│   │   │       │       │   ├── QONRemoteConfigMapper
+│   │   │       │       │   │   ├── QONRemoteConfigMapper.h
+│   │   │       │       │   │   └── QONRemoteConfigMapper.m
+│   │   │       │       │   └── QONUserPropertiesMapper
+│   │   │       │       │       ├── QONUserPropertiesMapper.h
+│   │   │       │       │       └── QONUserPropertiesMapper.m
+│   │   │       │       ├── Models
+│   │   │       │       │   ├── Protected
+│   │   │       │       │   │   ├── QONExperiment+Protected.h
+│   │   │       │       │   │   ├── QONExperimentGroup+Protected.h
+│   │   │       │       │   │   ├── QONIntroEligibility+Protected.h
+│   │   │       │       │   │   ├── QONLaunchResult+Protected.h
+│   │   │       │       │   │   ├── QONOffering+Protected.h
+│   │   │       │       │   │   ├── QONOfferings+Protected.h
+│   │   │       │       │   │   ├── QONPromotionalOffer+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfig+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfigList+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfigurationSource+Protected.h
+│   │   │       │       │   │   ├── QONSubscriptionPeriod+Protected.h
+│   │   │       │       │   │   ├── QONTransaction+Protected.h
+│   │   │       │       │   │   ├── QONUser+Protected.h
+│   │   │       │       │   │   ├── QONUserProperties+Protected.h
+│   │   │       │       │   │   └── QONUserProperty+Protected.h
+│   │   │       │       │   ├── QNMapperObject
+│   │   │       │       │   │   ├── QNMapperObject.h
+│   │   │       │       │   │   └── QNMapperObject.m
+│   │   │       │       │   └── QONFallbackObject
+│   │   │       │       │       ├── QONFallbackObject.h
+│   │   │       │       │       └── QONFallbackObject.m
+│   │   │       │       ├── Services
+│   │   │       │       │   ├── QNAPIClient
+│   │   │       │       │   │   ├── QNAPIClient.h
+│   │   │       │       │   │   └── QNAPIClient.m
+│   │   │       │       │   ├── QNIdentityService
+│   │   │       │       │   │   ├── QNIdentityService.h
+│   │   │       │       │   │   ├── QNIdentityService.m
+│   │   │       │       │   │   └── QNIdentityServiceInterface.h
+│   │   │       │       │   ├── QNStoreKitService
+│   │   │       │       │   │   ├── QNStoreKitService.h
+│   │   │       │       │   │   └── QNStoreKitService.m
+│   │   │       │       │   ├── QNUserInfoService
+│   │   │       │       │   │   ├── QNUserInfoService.h
+│   │   │       │       │   │   ├── QNUserInfoService.m
+│   │   │       │       │   │   └── QNUserInfoServiceInterface.h
+│   │   │       │       │   ├── QONExceptionManager
+│   │   │       │       │   │   ├── QONExceptionManager.h
+│   │   │       │       │   │   └── QONExceptionManager.m
+│   │   │       │       │   ├── QONFallbackService
+│   │   │       │       │   │   ├── QONFallbackService.h
+│   │   │       │       │   │   └── QONFallbackService.m
+│   │   │       │       │   └── QONRemoteConfigService
+│   │   │       │       │       ├── QONRemoteConfigService.h
+│   │   │       │       │       └── QONRemoteConfigService.m
+│   │   │       │       └── Utils
+│   │   │       │           ├── NSError+Sugare
+│   │   │       │           │   ├── NSError+Sugare.h
+│   │   │       │           │   └── NSError+Sugare.m
+│   │   │       │           ├── QNDevice
+│   │   │       │           │   ├── QNDevice.h
+│   │   │       │           │   └── QNDevice.m
+│   │   │       │           ├── QNProperties
+│   │   │       │           │   ├── QNProperties.h
+│   │   │       │           │   └── QNProperties.m
+│   │   │       │           ├── QNRateLimiter
+│   │   │       │           │   ├── QONRateLimiter.h
+│   │   │       │           │   ├── QONRateLimiter.m
+│   │   │       │           │   ├── QONRequest.h
+│   │   │       │           │   └── QONRequest.m
+│   │   │       │           ├── QNUserInfo
+│   │   │       │           │   ├── QNUserInfo.h
+│   │   │       │           │   └── QNUserInfo.m
+│   │   │       │           ├── QNUtils
+│   │   │       │           │   ├── QNUtils.h
+│   │   │       │           │   └── QNUtils.m
+│   │   │       │           └── QONRequestTrigger
+│   │   │       │               └── QONRequestTrigger.h
+│   │   │       └── Swift
+│   │   │           ├── Extensions.swift
+│   │   │           ├── PurchasesMapper.swift
+│   │   │           ├── QonversionSwift.swift
+│   │   │           └── StoreKit2Service.swift
+│   │   ├── QonversionSandwich
+│   │   │   ├── ios
+│   │   │   │   └── sandwich
+│   │   │   │       ├── CompletionHandlers.swift
+│   │   │   │       ├── Constants.swift
+│   │   │   │       ├── Mappers.swift
+│   │   │   │       ├── NoCodesEventListener.swift
+│   │   │   │       ├── NoCodesMapper.swift
+│   │   │   │       ├── NoCodesSandwich.swift
+│   │   │   │       ├── QonversionEventListener.swift
+│   │   │   │       ├── QonversionSandwich.swift
+│   │   │   │       └── SandwichError.swift
+│   │   │   ├── LICENSE.txt
+│   │   │   └── README.md
+│   │   └── Target Support Files
+│   │       ├── app_links
+│   │       │   ├── app_links-dummy.m
+│   │       │   ├── app_links-Info.plist
+│   │       │   ├── app_links-prefix.pch
+│   │       │   ├── app_links-umbrella.h
+│   │       │   ├── app_links.debug.xcconfig
+│   │       │   ├── app_links.modulemap
+│   │       │   ├── app_links.release.xcconfig
+│   │       │   └── ResourceBundle-app_links_ios_privacy-app_links-Info.plist
+│   │       ├── Flutter
+│   │       │   ├── Flutter.debug.xcconfig
+│   │       │   └── Flutter.release.xcconfig
+│   │       ├── NoCodes
+│   │       │   ├── NoCodes-dummy.m
+│   │       │   ├── NoCodes-Info.plist
+│   │       │   ├── NoCodes-prefix.pch
+│   │       │   ├── NoCodes-umbrella.h
+│   │       │   ├── NoCodes.debug.xcconfig
+│   │       │   ├── NoCodes.modulemap
+│   │       │   ├── NoCodes.release.xcconfig
+│   │       │   └── ResourceBundle-NoCodes-NoCodes-Info.plist
+│   │       ├── path_provider_foundation
+│   │       │   ├── path_provider_foundation-dummy.m
+│   │       │   ├── path_provider_foundation-Info.plist
+│   │       │   ├── path_provider_foundation-prefix.pch
+│   │       │   ├── path_provider_foundation-umbrella.h
+│   │       │   ├── path_provider_foundation.debug.xcconfig
+│   │       │   ├── path_provider_foundation.modulemap
+│   │       │   ├── path_provider_foundation.release.xcconfig
+│   │       │   └── ResourceBundle-path_provider_foundation_privacy-path_provider_foundation-Info.plist
+│   │       ├── Pods-Runner
+│   │       │   ├── Pods-Runner-acknowledgements.markdown
+│   │       │   ├── Pods-Runner-acknowledgements.plist
+│   │       │   ├── Pods-Runner-dummy.m
+│   │       │   ├── Pods-Runner-frameworks-Debug-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Debug-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks.sh
+│   │       │   ├── Pods-Runner-Info.plist
+│   │       │   ├── Pods-Runner-umbrella.h
+│   │       │   ├── Pods-Runner.debug.xcconfig
+│   │       │   ├── Pods-Runner.modulemap
+│   │       │   ├── Pods-Runner.profile.xcconfig
+│   │       │   └── Pods-Runner.release.xcconfig
+│   │       ├── Pods-RunnerTests
+│   │       │   ├── Pods-RunnerTests-acknowledgements.markdown
+│   │       │   ├── Pods-RunnerTests-acknowledgements.plist
+│   │       │   ├── Pods-RunnerTests-dummy.m
+│   │       │   ├── Pods-RunnerTests-Info.plist
+│   │       │   ├── Pods-RunnerTests-umbrella.h
+│   │       │   ├── Pods-RunnerTests.debug.xcconfig
+│   │       │   ├── Pods-RunnerTests.modulemap
+│   │       │   ├── Pods-RunnerTests.profile.xcconfig
+│   │       │   └── Pods-RunnerTests.release.xcconfig
+│   │       ├── Qonversion
+│   │       │   ├── Qonversion-dummy.m
+│   │       │   ├── Qonversion-Info.plist
+│   │       │   ├── Qonversion-prefix.pch
+│   │       │   ├── Qonversion-umbrella.h
+│   │       │   ├── Qonversion.debug.xcconfig
+│   │       │   ├── Qonversion.modulemap
+│   │       │   ├── Qonversion.release.xcconfig
+│   │       │   └── ResourceBundle-Qonversion-Qonversion-Info.plist
+│   │       ├── qonversion_flutter
+│   │       │   ├── qonversion_flutter-dummy.m
+│   │       │   ├── qonversion_flutter-Info.plist
+│   │       │   ├── qonversion_flutter-prefix.pch
+│   │       │   ├── qonversion_flutter-umbrella.h
+│   │       │   ├── qonversion_flutter.debug.xcconfig
+│   │       │   ├── qonversion_flutter.modulemap
+│   │       │   └── qonversion_flutter.release.xcconfig
+│   │       ├── QonversionSandwich
+│   │       │   ├── QonversionSandwich-dummy.m
+│   │       │   ├── QonversionSandwich-Info.plist
+│   │       │   ├── QonversionSandwich-prefix.pch
+│   │       │   ├── QonversionSandwich-umbrella.h
+│   │       │   ├── QonversionSandwich.debug.xcconfig
+│   │       │   ├── QonversionSandwich.modulemap
+│   │       │   └── QonversionSandwich.release.xcconfig
+│   │       ├── shared_preferences_foundation
+│   │       │   ├── ResourceBundle-shared_preferences_foundation_privacy-shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-dummy.m
+│   │       │   ├── shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-prefix.pch
+│   │       │   ├── shared_preferences_foundation-umbrella.h
+│   │       │   ├── shared_preferences_foundation.debug.xcconfig
+│   │       │   ├── shared_preferences_foundation.modulemap
+│   │       │   └── shared_preferences_foundation.release.xcconfig
+│   │       ├── url_launcher_ios
+│   │       │   ├── ResourceBundle-url_launcher_ios_privacy-url_launcher_ios-Info.plist
+│   │       │   ├── url_launcher_ios-dummy.m
+│   │       │   ├── url_launcher_ios-Info.plist
+│   │       │   ├── url_launcher_ios-prefix.pch
+│   │       │   ├── url_launcher_ios-umbrella.h
+│   │       │   ├── url_launcher_ios.debug.xcconfig
+│   │       │   ├── url_launcher_ios.modulemap
+│   │       │   └── url_launcher_ios.release.xcconfig
+│   │       └── video_player_avfoundation
+│   │           ├── ResourceBundle-video_player_avfoundation_privacy-video_player_avfoundation-Info.plist
+│   │           ├── video_player_avfoundation-dummy.m
+│   │           ├── video_player_avfoundation-Info.plist
+│   │           ├── video_player_avfoundation-prefix.pch
+│   │           ├── video_player_avfoundation-umbrella.h
+│   │           ├── video_player_avfoundation.debug.xcconfig
+│   │           ├── video_player_avfoundation.modulemap
+│   │           └── video_player_avfoundation.release.xcconfig
+│   ├── Runner
+│   │   ├── AppDelegate.swift
+│   │   ├── Assets.xcassets
+│   │   │   ├── AppIcon.appiconset
+│   │   │   │   ├── Contents.json
+│   │   │   │   ├── Icon-App-1024x1024@1x.png
+│   │   │   │   ├── Icon-App-20x20@1x.png
+│   │   │   │   ├── Icon-App-20x20@2x.png
+│   │   │   │   ├── Icon-App-20x20@3x.png
+│   │   │   │   ├── Icon-App-29x29@1x.png
+│   │   │   │   ├── Icon-App-29x29@2x.png
+│   │   │   │   ├── Icon-App-29x29@3x.png
+│   │   │   │   ├── Icon-App-40x40@1x.png
+│   │   │   │   ├── Icon-App-40x40@2x.png
+│   │   │   │   ├── Icon-App-40x40@3x.png
+│   │   │   │   ├── Icon-App-60x60@2x.png
+│   │   │   │   ├── Icon-App-60x60@3x.png
+│   │   │   │   ├── Icon-App-76x76@1x.png
+│   │   │   │   ├── Icon-App-76x76@2x.png
+│   │   │   │   └── Icon-App-83.5x83.5@2x.png
+│   │   │   └── LaunchImage.imageset
+│   │   │       ├── Contents.json
+│   │   │       ├── LaunchImage.png
+│   │   │       ├── LaunchImage@2x.png
+│   │   │       ├── LaunchImage@3x.png
+│   │   │       └── README.md
+│   │   ├── Base.lproj
+│   │   │   ├── LaunchScreen.storyboard
+│   │   │   └── Main.storyboard
+│   │   ├── GeneratedPluginRegistrant.h
+│   │   ├── GeneratedPluginRegistrant.m
+│   │   ├── Info.plist
+│   │   └── Runner-Bridging-Header.h
+│   ├── Runner.xcodeproj
+│   │   ├── project.pbxproj
+│   │   ├── project.xcworkspace
+│   │   │   ├── contents.xcworkspacedata
+│   │   │   └── xcshareddata
+│   │   │       ├── IDEWorkspaceChecks.plist
+│   │   │       ├── swiftpm
+│   │   │       │   └── configuration
+│   │   │       └── WorkspaceSettings.xcsettings
+│   │   └── xcshareddata
+│   │       └── xcschemes
+│   │           └── Runner.xcscheme
+│   ├── Runner.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   └── xcshareddata
+│   │       ├── IDEWorkspaceChecks.plist
+│   │       ├── swiftpm
+│   │       │   └── configuration
+│   │       └── WorkspaceSettings.xcsettings
+│   └── RunnerTests
+│       └── RunnerTests.swift
+├── lib
+│   ├── core
+│   │   ├── network
+│   │   ├── services
+│   │   ├── theme
+│   │   └── widgets
+│   ├── features
+│   │   ├── auth
+│   │   │   ├── models
+│   │   │   ├── viewmodels
+│   │   │   ├── views
+│   │   │   └── widgets
+│   │   ├── explore
+│   │   │   └── views
+│   │   │       └── explore_page.dart
+│   │   ├── home
+│   │   │   ├── models
+│   │   │   ├── viewmodels
+│   │   │   ├── views
+│   │   │   │   └── home_page.dart
+│   │   │   └── widgets
+│   │   │       ├── gradient_cta_button.dart
+│   │   │       └── gradient_dropdown_menu.dart
+│   │   ├── library
+│   │   │   └── views
+│   │   │       └── library_page.dart
+│   │   ├── onboarding
+│   │   │   └── views
+│   │   │       └── onboarding_screen.dart
+│   │   ├── profile
+│   │   │   ├── models
+│   │   │   ├── viewmodels
+│   │   │   ├── views
+│   │   │   └── widgets
+│   │   ├── qonversion
+│   │   │   └── views
+│   │   │       └── qonversion_screen.dart
+│   │   └── splash_screen
+│   │       ├── models
+│   │       ├── viewmodels
+│   │       ├── views
+│   │       │   └── splash_screen.dart
+│   │       └── widgets
+│   ├── main.dart
+│   ├── router
+│   │   ├── router_config.dart
+│   │   └── router_constants.dart
+│   ├── shared
+│   │   ├── models
+│   │   ├── services
+│   │   └── widgets
+│   └── utils
+├── linux
+│   ├── CMakeLists.txt
+│   ├── flutter
+│   │   ├── CMakeLists.txt
+│   │   ├── ephemeral
+│   │   ├── generated_plugin_registrant.cc
+│   │   ├── generated_plugin_registrant.h
+│   │   └── generated_plugins.cmake
+│   └── runner
+│       ├── CMakeLists.txt
+│       ├── main.cc
+│       ├── my_application.cc
+│       └── my_application.h
+├── macos
+│   ├── Flutter
+│   │   ├── ephemeral
+│   │   │   ├── flutter_export_environment.sh
+│   │   │   └── Flutter-Generated.xcconfig
+│   │   ├── Flutter-Debug.xcconfig
+│   │   ├── Flutter-Release.xcconfig
+│   │   └── GeneratedPluginRegistrant.swift
+│   ├── Podfile
+│   ├── Podfile.lock
+│   ├── Pods
+│   │   ├── Headers
+│   │   ├── Local Podspecs
+│   │   │   ├── app_links.podspec.json
+│   │   │   ├── FlutterMacOS.podspec.json
+│   │   │   ├── path_provider_foundation.podspec.json
+│   │   │   ├── qonversion_flutter.podspec.json
+│   │   │   ├── shared_preferences_foundation.podspec.json
+│   │   │   ├── url_launcher_macos.podspec.json
+│   │   │   └── video_player_avfoundation.podspec.json
+│   │   ├── Pods.xcodeproj
+│   │   │   ├── project.pbxproj
+│   │   │   └── xcuserdata
+│   │   │       └── saieshsingh.xcuserdatad
+│   │   │           └── xcschemes
+│   │   │               ├── app_links-app_links_macos_privacy.xcscheme
+│   │   │               ├── app_links.xcscheme
+│   │   │               ├── FlutterMacOS.xcscheme
+│   │   │               ├── path_provider_foundation-path_provider_foundation_privacy.xcscheme
+│   │   │               ├── path_provider_foundation.xcscheme
+│   │   │               ├── Pods-Runner.xcscheme
+│   │   │               ├── Pods-RunnerTests.xcscheme
+│   │   │               ├── qonversion_flutter.xcscheme
+│   │   │               ├── Qonversion-Qonversion.xcscheme
+│   │   │               ├── Qonversion.xcscheme
+│   │   │               ├── QonversionSandwich.xcscheme
+│   │   │               ├── shared_preferences_foundation-shared_preferences_foundation_privacy.xcscheme
+│   │   │               ├── shared_preferences_foundation.xcscheme
+│   │   │               ├── url_launcher_macos-url_launcher_macos_privacy.xcscheme
+│   │   │               ├── url_launcher_macos.xcscheme
+│   │   │               ├── video_player_avfoundation-video_player_avfoundation_privacy.xcscheme
+│   │   │               ├── video_player_avfoundation.xcscheme
+│   │   │               └── xcschememanagement.plist
+│   │   ├── Qonversion
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   └── Sources
+│   │   │       ├── PrivacyInfo.xcprivacy
+│   │   │       ├── Qonversion
+│   │   │       │   ├── IDFA
+│   │   │       │   │   ├── QNDevice+Advertising.h
+│   │   │       │   │   └── QNDevice+Advertising.m
+│   │   │       │   ├── Public
+│   │   │       │   │   ├── QONConfiguration.h
+│   │   │       │   │   ├── QONConfiguration.m
+│   │   │       │   │   ├── QONEntitlement.h
+│   │   │       │   │   ├── QONEntitlement.m
+│   │   │       │   │   ├── QONEntitlementsCacheLifetime.h
+│   │   │       │   │   ├── QONEntitlementsUpdateListener.h
+│   │   │       │   │   ├── QONEnvironment.h
+│   │   │       │   │   ├── QONErrors.h
+│   │   │       │   │   ├── QONErrors.m
+│   │   │       │   │   ├── QONExperiment.h
+│   │   │       │   │   ├── QONExperiment.m
+│   │   │       │   │   ├── QONExperimentGroup.h
+│   │   │       │   │   ├── QONExperimentGroup.m
+│   │   │       │   │   ├── QONIntroEligibility.h
+│   │   │       │   │   ├── QONIntroEligibility.m
+│   │   │       │   │   ├── QONLaunchMode.h
+│   │   │       │   │   ├── QONLaunchResult.h
+│   │   │       │   │   ├── QONLaunchResult.m
+│   │   │       │   │   ├── QONOffering.h
+│   │   │       │   │   ├── QONOffering.m
+│   │   │       │   │   ├── QONOfferings.h
+│   │   │       │   │   ├── QONOfferings.m
+│   │   │       │   │   ├── QONProduct.h
+│   │   │       │   │   ├── QONProduct.m
+│   │   │       │   │   ├── QONPromoPurchasesDelegate.h
+│   │   │       │   │   ├── QONPromotionalOffer.h
+│   │   │       │   │   ├── QONPromotionalOffer.m
+│   │   │       │   │   ├── QONPurchaseOptions.h
+│   │   │       │   │   ├── QONPurchaseOptions.m
+│   │   │       │   │   ├── QONRemoteConfig.h
+│   │   │       │   │   ├── QONRemoteConfig.m
+│   │   │       │   │   ├── QONRemoteConfigList.h
+│   │   │       │   │   ├── QONRemoteConfigList.m
+│   │   │       │   │   ├── QONRemoteConfigurationSource.h
+│   │   │       │   │   ├── QONRemoteConfigurationSource.m
+│   │   │       │   │   ├── QONStoreKit2PurchaseModel.h
+│   │   │       │   │   ├── QONStoreKit2PurchaseModel.m
+│   │   │       │   │   ├── QONStoreKitSugare.h
+│   │   │       │   │   ├── QONStoreKitSugare.m
+│   │   │       │   │   ├── QONSubscriptionPeriod.h
+│   │   │       │   │   ├── QONSubscriptionPeriod.m
+│   │   │       │   │   ├── QONTransaction.h
+│   │   │       │   │   ├── QONTransaction.m
+│   │   │       │   │   ├── QONUser.h
+│   │   │       │   │   ├── QONUser.m
+│   │   │       │   │   ├── QONUserProperties.h
+│   │   │       │   │   ├── QONUserProperties.m
+│   │   │       │   │   ├── QONUserProperty.h
+│   │   │       │   │   ├── QONUserProperty.m
+│   │   │       │   │   ├── Qonversion.h
+│   │   │       │   │   └── Qonversion.m
+│   │   │       │   └── Qonversion
+│   │   │       │       ├── Assemblies
+│   │   │       │       │   └── QNServicesAssembly
+│   │   │       │       │       ├── QNServicesAssembly.h
+│   │   │       │       │       └── QNServicesAssembly.m
+│   │   │       │       ├── Constants
+│   │   │       │       │   ├── QNAPIConstants
+│   │   │       │       │   │   ├── QNAPIConstants.h
+│   │   │       │       │   │   └── QNAPIConstants.m
+│   │   │       │       │   └── QNInternalConstants
+│   │   │       │       │       ├── QNInternalConstants.h
+│   │   │       │       │       └── QNInternalConstants.m
+│   │   │       │       ├── Core
+│   │   │       │       │   ├── QNInMemoryStorage
+│   │   │       │       │   │   ├── QNInMemoryStorage.h
+│   │   │       │       │   │   └── QNInMemoryStorage.m
+│   │   │       │       │   ├── QNKeyedArchiver
+│   │   │       │       │   │   ├── QNKeyedArchiver.h
+│   │   │       │       │   │   └── QNKeyedArchiver.m
+│   │   │       │       │   ├── QNLocalStorage.h
+│   │   │       │       │   ├── QNRequestBuilder
+│   │   │       │       │   │   ├── QNRequestBuilder.h
+│   │   │       │       │   │   └── QNRequestBuilder.m
+│   │   │       │       │   ├── QNRequestSerializer
+│   │   │       │       │   │   ├── QNRequestSerializer.h
+│   │   │       │       │   │   └── QNRequestSerializer.m
+│   │   │       │       │   └── QNUserDefaultsStorage
+│   │   │       │       │       ├── QNUserDefaultsStorage.h
+│   │   │       │       │       └── QNUserDefaultsStorage.m
+│   │   │       │       ├── Main
+│   │   │       │       │   ├── QNAttributionManager
+│   │   │       │       │   │   ├── QNAttributionManager.h
+│   │   │       │       │   │   └── QNAttributionManager.m
+│   │   │       │       │   ├── QNIdentityManager
+│   │   │       │       │   │   ├── QNIdentityManager.h
+│   │   │       │       │   │   ├── QNIdentityManager.m
+│   │   │       │       │   │   └── QNIdentityManagerInterface.h
+│   │   │       │       │   ├── QNProductCenterManager
+│   │   │       │       │   │   ├── QNProductCenterManager.h
+│   │   │       │       │   │   └── QNProductCenterManager.m
+│   │   │       │       │   ├── QNUserPropertiesManager
+│   │   │       │       │   │   ├── QNUserPropertiesManager.h
+│   │   │       │       │   │   └── QNUserPropertiesManager.m
+│   │   │       │       │   └── QONRemoteConfigManager
+│   │   │       │       │       ├── QONRemoteConfigListRequestData.h
+│   │   │       │       │       ├── QONRemoteConfigListRequestData.m
+│   │   │       │       │       ├── QONRemoteConfigLoadingState.h
+│   │   │       │       │       ├── QONRemoteConfigLoadingState.m
+│   │   │       │       │       ├── QONRemoteConfigManager.h
+│   │   │       │       │       └── QONRemoteConfigManager.m
+│   │   │       │       ├── Mappers
+│   │   │       │       │   ├── QNErrorsMapper
+│   │   │       │       │   │   ├── QNErrorsMapper.h
+│   │   │       │       │   │   └── QNErrorsMapper.m
+│   │   │       │       │   ├── QNMapper
+│   │   │       │       │   │   ├── QNMapper.h
+│   │   │       │       │   │   └── QNMapper.m
+│   │   │       │       │   ├── QNUserInfoMapper
+│   │   │       │       │   │   ├── QNUserInfoMapper.h
+│   │   │       │       │   │   ├── QNUserInfoMapper.m
+│   │   │       │       │   │   └── QNUserInfoMapperInterface.h
+│   │   │       │       │   ├── QONFallbackMapper
+│   │   │       │       │   │   ├── QONFallbackMapper.h
+│   │   │       │       │   │   └── QONFallbackMapper.m
+│   │   │       │       │   ├── QONRemoteConfigMapper
+│   │   │       │       │   │   ├── QONRemoteConfigMapper.h
+│   │   │       │       │   │   └── QONRemoteConfigMapper.m
+│   │   │       │       │   └── QONUserPropertiesMapper
+│   │   │       │       │       ├── QONUserPropertiesMapper.h
+│   │   │       │       │       └── QONUserPropertiesMapper.m
+│   │   │       │       ├── Models
+│   │   │       │       │   ├── Protected
+│   │   │       │       │   │   ├── QONExperiment+Protected.h
+│   │   │       │       │   │   ├── QONExperimentGroup+Protected.h
+│   │   │       │       │   │   ├── QONIntroEligibility+Protected.h
+│   │   │       │       │   │   ├── QONLaunchResult+Protected.h
+│   │   │       │       │   │   ├── QONOffering+Protected.h
+│   │   │       │       │   │   ├── QONOfferings+Protected.h
+│   │   │       │       │   │   ├── QONPromotionalOffer+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfig+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfigList+Protected.h
+│   │   │       │       │   │   ├── QONRemoteConfigurationSource+Protected.h
+│   │   │       │       │   │   ├── QONSubscriptionPeriod+Protected.h
+│   │   │       │       │   │   ├── QONTransaction+Protected.h
+│   │   │       │       │   │   ├── QONUser+Protected.h
+│   │   │       │       │   │   ├── QONUserProperties+Protected.h
+│   │   │       │       │   │   └── QONUserProperty+Protected.h
+│   │   │       │       │   ├── QNMapperObject
+│   │   │       │       │   │   ├── QNMapperObject.h
+│   │   │       │       │   │   └── QNMapperObject.m
+│   │   │       │       │   └── QONFallbackObject
+│   │   │       │       │       ├── QONFallbackObject.h
+│   │   │       │       │       └── QONFallbackObject.m
+│   │   │       │       ├── Services
+│   │   │       │       │   ├── QNAPIClient
+│   │   │       │       │   │   ├── QNAPIClient.h
+│   │   │       │       │   │   └── QNAPIClient.m
+│   │   │       │       │   ├── QNIdentityService
+│   │   │       │       │   │   ├── QNIdentityService.h
+│   │   │       │       │   │   ├── QNIdentityService.m
+│   │   │       │       │   │   └── QNIdentityServiceInterface.h
+│   │   │       │       │   ├── QNStoreKitService
+│   │   │       │       │   │   ├── QNStoreKitService.h
+│   │   │       │       │   │   └── QNStoreKitService.m
+│   │   │       │       │   ├── QNUserInfoService
+│   │   │       │       │   │   ├── QNUserInfoService.h
+│   │   │       │       │   │   ├── QNUserInfoService.m
+│   │   │       │       │   │   └── QNUserInfoServiceInterface.h
+│   │   │       │       │   ├── QONExceptionManager
+│   │   │       │       │   │   ├── QONExceptionManager.h
+│   │   │       │       │   │   └── QONExceptionManager.m
+│   │   │       │       │   ├── QONFallbackService
+│   │   │       │       │   │   ├── QONFallbackService.h
+│   │   │       │       │   │   └── QONFallbackService.m
+│   │   │       │       │   └── QONRemoteConfigService
+│   │   │       │       │       ├── QONRemoteConfigService.h
+│   │   │       │       │       └── QONRemoteConfigService.m
+│   │   │       │       └── Utils
+│   │   │       │           ├── NSError+Sugare
+│   │   │       │           │   ├── NSError+Sugare.h
+│   │   │       │           │   └── NSError+Sugare.m
+│   │   │       │           ├── QNDevice
+│   │   │       │           │   ├── QNDevice.h
+│   │   │       │           │   └── QNDevice.m
+│   │   │       │           ├── QNProperties
+│   │   │       │           │   ├── QNProperties.h
+│   │   │       │           │   └── QNProperties.m
+│   │   │       │           ├── QNRateLimiter
+│   │   │       │           │   ├── QONRateLimiter.h
+│   │   │       │           │   ├── QONRateLimiter.m
+│   │   │       │           │   ├── QONRequest.h
+│   │   │       │           │   └── QONRequest.m
+│   │   │       │           ├── QNUserInfo
+│   │   │       │           │   ├── QNUserInfo.h
+│   │   │       │           │   └── QNUserInfo.m
+│   │   │       │           ├── QNUtils
+│   │   │       │           │   ├── QNUtils.h
+│   │   │       │           │   └── QNUtils.m
+│   │   │       │           └── QONRequestTrigger
+│   │   │       │               └── QONRequestTrigger.h
+│   │   │       └── Swift
+│   │   │           ├── Extensions.swift
+│   │   │           ├── PurchasesMapper.swift
+│   │   │           ├── QonversionSwift.swift
+│   │   │           └── StoreKit2Service.swift
+│   │   ├── QonversionSandwich
+│   │   │   ├── ios
+│   │   │   │   └── sandwich
+│   │   │   │       ├── CompletionHandlers.swift
+│   │   │   │       ├── Constants.swift
+│   │   │   │       ├── Mappers.swift
+│   │   │   │       ├── NoCodesEventListener.swift
+│   │   │   │       ├── NoCodesMapper.swift
+│   │   │   │       ├── NoCodesSandwich.swift
+│   │   │   │       ├── QonversionEventListener.swift
+│   │   │   │       ├── QonversionSandwich.swift
+│   │   │   │       └── SandwichError.swift
+│   │   │   ├── LICENSE.txt
+│   │   │   └── README.md
+│   │   └── Target Support Files
+│   │       ├── app_links
+│   │       │   ├── app_links-dummy.m
+│   │       │   ├── app_links-Info.plist
+│   │       │   ├── app_links-prefix.pch
+│   │       │   ├── app_links-umbrella.h
+│   │       │   ├── app_links.debug.xcconfig
+│   │       │   ├── app_links.modulemap
+│   │       │   ├── app_links.release.xcconfig
+│   │       │   └── ResourceBundle-app_links_macos_privacy-app_links-Info.plist
+│   │       ├── FlutterMacOS
+│   │       │   ├── FlutterMacOS.debug.xcconfig
+│   │       │   └── FlutterMacOS.release.xcconfig
+│   │       ├── path_provider_foundation
+│   │       │   ├── path_provider_foundation-dummy.m
+│   │       │   ├── path_provider_foundation-Info.plist
+│   │       │   ├── path_provider_foundation-prefix.pch
+│   │       │   ├── path_provider_foundation-umbrella.h
+│   │       │   ├── path_provider_foundation.debug.xcconfig
+│   │       │   ├── path_provider_foundation.modulemap
+│   │       │   ├── path_provider_foundation.release.xcconfig
+│   │       │   └── ResourceBundle-path_provider_foundation_privacy-path_provider_foundation-Info.plist
+│   │       ├── Pods-Runner
+│   │       │   ├── Pods-Runner-acknowledgements.markdown
+│   │       │   ├── Pods-Runner-acknowledgements.plist
+│   │       │   ├── Pods-Runner-dummy.m
+│   │       │   ├── Pods-Runner-frameworks-Debug-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Debug-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks.sh
+│   │       │   ├── Pods-Runner-Info.plist
+│   │       │   ├── Pods-Runner-umbrella.h
+│   │       │   ├── Pods-Runner.debug.xcconfig
+│   │       │   ├── Pods-Runner.modulemap
+│   │       │   ├── Pods-Runner.profile.xcconfig
+│   │       │   └── Pods-Runner.release.xcconfig
+│   │       ├── Pods-RunnerTests
+│   │       │   ├── Pods-RunnerTests-acknowledgements.markdown
+│   │       │   ├── Pods-RunnerTests-acknowledgements.plist
+│   │       │   ├── Pods-RunnerTests-dummy.m
+│   │       │   ├── Pods-RunnerTests-Info.plist
+│   │       │   ├── Pods-RunnerTests-umbrella.h
+│   │       │   ├── Pods-RunnerTests.debug.xcconfig
+│   │       │   ├── Pods-RunnerTests.modulemap
+│   │       │   ├── Pods-RunnerTests.profile.xcconfig
+│   │       │   └── Pods-RunnerTests.release.xcconfig
+│   │       ├── Qonversion
+│   │       │   ├── Qonversion-dummy.m
+│   │       │   ├── Qonversion-Info.plist
+│   │       │   ├── Qonversion-prefix.pch
+│   │       │   ├── Qonversion-umbrella.h
+│   │       │   ├── Qonversion.debug.xcconfig
+│   │       │   ├── Qonversion.modulemap
+│   │       │   ├── Qonversion.release.xcconfig
+│   │       │   └── ResourceBundle-Qonversion-Qonversion-Info.plist
+│   │       ├── qonversion_flutter
+│   │       │   ├── qonversion_flutter-dummy.m
+│   │       │   ├── qonversion_flutter-Info.plist
+│   │       │   ├── qonversion_flutter-prefix.pch
+│   │       │   ├── qonversion_flutter-umbrella.h
+│   │       │   ├── qonversion_flutter.debug.xcconfig
+│   │       │   ├── qonversion_flutter.modulemap
+│   │       │   └── qonversion_flutter.release.xcconfig
+│   │       ├── QonversionSandwich
+│   │       │   ├── QonversionSandwich-dummy.m
+│   │       │   ├── QonversionSandwich-Info.plist
+│   │       │   ├── QonversionSandwich-prefix.pch
+│   │       │   ├── QonversionSandwich-umbrella.h
+│   │       │   ├── QonversionSandwich.debug.xcconfig
+│   │       │   ├── QonversionSandwich.modulemap
+│   │       │   └── QonversionSandwich.release.xcconfig
+│   │       ├── shared_preferences_foundation
+│   │       │   ├── ResourceBundle-shared_preferences_foundation_privacy-shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-dummy.m
+│   │       │   ├── shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-prefix.pch
+│   │       │   ├── shared_preferences_foundation-umbrella.h
+│   │       │   ├── shared_preferences_foundation.debug.xcconfig
+│   │       │   ├── shared_preferences_foundation.modulemap
+│   │       │   └── shared_preferences_foundation.release.xcconfig
+│   │       ├── url_launcher_macos
+│   │       │   ├── ResourceBundle-url_launcher_macos_privacy-url_launcher_macos-Info.plist
+│   │       │   ├── url_launcher_macos-dummy.m
+│   │       │   ├── url_launcher_macos-Info.plist
+│   │       │   ├── url_launcher_macos-prefix.pch
+│   │       │   ├── url_launcher_macos-umbrella.h
+│   │       │   ├── url_launcher_macos.debug.xcconfig
+│   │       │   ├── url_launcher_macos.modulemap
+│   │       │   └── url_launcher_macos.release.xcconfig
+│   │       └── video_player_avfoundation
+│   │           ├── ResourceBundle-video_player_avfoundation_privacy-video_player_avfoundation-Info.plist
+│   │           ├── video_player_avfoundation-dummy.m
+│   │           ├── video_player_avfoundation-Info.plist
+│   │           ├── video_player_avfoundation-prefix.pch
+│   │           ├── video_player_avfoundation-umbrella.h
+│   │           ├── video_player_avfoundation.debug.xcconfig
+│   │           ├── video_player_avfoundation.modulemap
+│   │           └── video_player_avfoundation.release.xcconfig
+│   ├── Runner
+│   │   ├── AppDelegate.swift
+│   │   ├── Assets.xcassets
+│   │   │   └── AppIcon.appiconset
+│   │   │       ├── app_icon_1024.png
+│   │   │       ├── app_icon_128.png
+│   │   │       ├── app_icon_16.png
+│   │   │       ├── app_icon_256.png
+│   │   │       ├── app_icon_32.png
+│   │   │       ├── app_icon_512.png
+│   │   │       ├── app_icon_64.png
+│   │   │       └── Contents.json
+│   │   ├── Base.lproj
+│   │   │   └── MainMenu.xib
+│   │   ├── Configs
+│   │   │   ├── AppInfo.xcconfig
+│   │   │   ├── Debug.xcconfig
+│   │   │   ├── Release.xcconfig
+│   │   │   └── Warnings.xcconfig
+│   │   ├── DebugProfile.entitlements
+│   │   ├── Info.plist
+│   │   ├── MainFlutterWindow.swift
+│   │   └── Release.entitlements
+│   ├── Runner.xcodeproj
+│   │   ├── project.pbxproj
+│   │   ├── project.xcworkspace
+│   │   │   └── xcshareddata
+│   │   │       ├── IDEWorkspaceChecks.plist
+│   │   │       └── swiftpm
+│   │   │           └── configuration
+│   │   └── xcshareddata
+│   │       └── xcschemes
+│   │           └── Runner.xcscheme
+│   ├── Runner.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   └── xcshareddata
+│   │       ├── IDEWorkspaceChecks.plist
+│   │       └── swiftpm
+│   │           └── configuration
+│   └── RunnerTests
+│       └── RunnerTests.swift
+├── music_app.iml
+├── pubspec.lock
+├── pubspec.yaml
+├── README.md
+├── test
+│   └── widget_test.dart
+├── web
+│   ├── favicon.png
+│   ├── icons
+│   │   ├── Icon-192.png
+│   │   ├── Icon-512.png
+│   │   ├── Icon-maskable-192.png
+│   │   └── Icon-maskable-512.png
+│   ├── index.html
+│   └── manifest.json
+└── windows
+    ├── CMakeLists.txt
+    ├── flutter
+    │   ├── CMakeLists.txt
+    │   ├── ephemeral
+    │   ├── generated_plugin_registrant.cc
+    │   ├── generated_plugin_registrant.h
+    │   └── generated_plugins.cmake
+    └── runner
+        ├── CMakeLists.txt
+        ├── flutter_window.cpp
+        ├── flutter_window.h
+        ├── main.cpp
+        ├── resource.h
+        ├── resources
+        │   └── app_icon.ico
+        ├── runner.exe.manifest
+        ├── Runner.rc
+        ├── utils.cpp
+        ├── utils.h
+        ├── win32_window.cpp
+        └── win32_window.h
+
+308 directories, 816 files
