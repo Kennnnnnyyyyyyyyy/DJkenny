@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../home/widgets/gradient_cta_button.dart';
+import '../../../shared/services/realtime.dart';
+import '../../../shared/widgets/track_card.dart';
 
-class LibraryPage extends StatelessWidget {
+class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
+
+  @override
+  State<LibraryPage> createState() => _LibraryPageState();
+}
+
+class _LibraryPageState extends State<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
@@ -42,38 +50,46 @@ class LibraryPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade900,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.library_music, color: Colors.white, size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  'Create your first song\nand it will be displayed here.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
+      body: library.isEmpty
+        ? Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade900,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(height: 24),
-                Center(
-                  child: GradientCTAButton(
-                    text: 'Start Creating',
-                    onTap: () {
-                      Navigator.pushNamed(context, '/home');
-                    },
-                  ),
+                child: Column(
+                  children: [
+                    Icon(Icons.library_music, color: Colors.white, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Create your first song\nand it will be displayed here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: GradientCTAButton(
+                        text: 'Start Creating',
+                        onTap: () {
+                          Navigator.pushNamed(context, '/home');
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          )
+        : Expanded(
+            child: GridView.extent(
+              maxCrossAxisExtent: 280,
+              padding: const EdgeInsets.all(16),
+              children: library.map((song) => TrackCard(song)).toList(),
             ),
           ),
-        ],
-      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.white,

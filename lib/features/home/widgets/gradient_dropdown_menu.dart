@@ -17,18 +17,9 @@ class PillDropdownMenu extends StatefulWidget {
   State<PillDropdownMenu> createState() => _PillDropdownMenuState();
 }
 
-class _PillDropdownMenuState extends State<PillDropdownMenu> with SingleTickerProviderStateMixin {
+class _PillDropdownMenuState extends State<PillDropdownMenu> {
   bool _expanded = false;
   OverlayEntry? _dropdownOverlay;
-  late AnimationController _controller;
-  late Animation<double> _expandAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-    _expandAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-  }
 
   @override
   void dispose() {
@@ -78,13 +69,13 @@ class _PillDropdownMenuState extends State<PillDropdownMenu> with SingleTickerPr
                       letterSpacing: 1.1,
                     ),
                   ),
-                  tileColor: isSelected ? Color(0xFF3813C2).withOpacity(0.7) : null,
+                  tileColor: isSelected ? Color(0xFF3813C2).withValues(alpha: 0.7) : null,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onTap: () {
                     widget.onChanged(item);
                     _toggleDropdown();
                   },
-                  hoverColor: Color(0xFFFF6FD8).withOpacity(0.2),
+                  hoverColor: Color(0xFFFF6FD8).withValues(alpha: 0.2),
                 );
               }).toList(),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class GradientCTAButton extends StatefulWidget {
   final String text;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const GradientCTAButton({required this.text, required this.onTap, super.key});
 
   @override
@@ -34,7 +34,7 @@ class _GradientCTAButtonState extends State<GradientCTAButton> {
           boxShadow: [
             if (_hovering)
               BoxShadow(
-                color: Color(0xFFFF6FD8).withOpacity(0.3),
+                color: Color(0xFFFF6FD8).withValues(alpha: 0.3),
                 blurRadius: 16,
                 offset: Offset(0, 4),
               ),

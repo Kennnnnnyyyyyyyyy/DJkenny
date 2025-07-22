@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class QonversionScreen extends StatefulWidget {
   const QonversionScreen({super.key});
@@ -72,7 +71,7 @@ class _QonversionScreenState extends State<QonversionScreen> {
                       Text(
                         'MELO AI Music',
                         style: TextStyle(
-                          fontFamily: 'Boulder',
+                          fontFamily: 'Inter',
                           color: Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -80,7 +79,7 @@ class _QonversionScreenState extends State<QonversionScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 4,
-                              color: Colors.black.withOpacity(0.25),
+                              color: Colors.black.withValues(alpha: 0.25),
                               offset: Offset(0, 2),
                             ),
                           ],
@@ -93,6 +92,7 @@ class _QonversionScreenState extends State<QonversionScreen> {
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
+                          fontFamily: 'Inter',
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -116,23 +116,23 @@ class _QonversionScreenState extends State<QonversionScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           onPressed: () {},
-                          child: const Text('Continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          child: const Text('Continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Center(
                         child: Column(
                           children: [
-                            Text('₹6,900.00/year. Cancel anytime', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            Text('₹6,900.00/year. Cancel anytime', style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Inter')),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Restore Purchase', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12)),
+                                Text('Restore Purchase', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
                                 const SizedBox(width: 12),
-                                Text('Terms of Use', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12)),
+                                Text('Terms of Use', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
                                 const SizedBox(width: 12),
-                                Text('Privacy Policy', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12)),
+                                Text('Privacy Policy', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
                               ],
                             ),
                           ],
@@ -164,57 +164,7 @@ class _FeatureText extends StatelessWidget {
         children: [
           const Icon(Icons.check, color: Colors.deepPurple, size: 20),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(fontSize: 16, color: Colors.white)),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlanCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final String period;
-  final String subPrice;
-  final bool selected;
-  final bool highlight;
-  const _PlanCard({
-    required this.title,
-    required this.price,
-    required this.period,
-    required this.subPrice,
-    required this.selected,
-    required this.highlight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: highlight ? Colors.deepPurple.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: highlight ? Colors.deepPurpleAccent : Colors.white24,
-          width: highlight ? 2 : 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Text(price, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-              Text(period, style: const TextStyle(color: Colors.white70, fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(subPrice, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14)),
-          const SizedBox(height: 6),
-          Text('Unlimited song creation', style: TextStyle(color: highlight ? Colors.greenAccent : Colors.white70, fontSize: 14)),
+          Text(text, style: const TextStyle(fontSize: 16, color: Colors.white, fontFamily: 'Inter')),
         ],
       ),
     );
@@ -223,7 +173,7 @@ class _PlanCard extends StatelessWidget {
 
 // Stacked plan cards widget
 class _StackedPlanCards extends StatelessWidget {
-  const _StackedPlanCards({Key? key}) : super(key: key);
+  const _StackedPlanCards();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -261,15 +211,14 @@ class _StackedPlanCard extends StatelessWidget {
     required this.period,
     required this.subPrice,
     required this.selected,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: selected ? Colors.deepPurple.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+        color: selected ? Colors.deepPurple.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: selected ? Colors.deepPurpleAccent : Colors.white24,
@@ -285,7 +234,7 @@ class _StackedPlanCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
                     if (selected)
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
@@ -296,14 +245,14 @@ class _StackedPlanCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(price, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                    Text(period, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                    Text(price, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                    Text(period, style: const TextStyle(color: Colors.white70, fontSize: 16, fontFamily: 'Inter')),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(subPrice, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14)),
+                Text(subPrice, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, fontFamily: 'Inter')),
                 const SizedBox(height: 6),
-                Text('Unlimited song creation', style: TextStyle(color: selected ? Colors.greenAccent : Colors.white70, fontSize: 14)),
+                Text('Unlimited song creation', style: TextStyle(color: selected ? Colors.greenAccent : Colors.white70, fontSize: 14, fontFamily: 'Inter')),
               ],
             ),
           ),
