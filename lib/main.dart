@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
           brightness: Brightness.dark,
         ),
+        fontFamily: 'Manrope', // Set Manrope as the default font for the entire app
         useMaterial3: true,
       ),
       home: _buildInitialScreen(),
@@ -107,7 +108,7 @@ class _TestScreen extends StatelessWidget {
             const SizedBox(height: 20),
             const Text(
               'Music App',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Manrope'),
             ),
             const SizedBox(height: 20),
             Container(
@@ -121,12 +122,12 @@ class _TestScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Supabase Not Connected',
-                    style: TextStyle(color: Colors.orange, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.orange, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Manrope'),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     'To connect Supabase:\n\n1. Edit lib/config/supabase_config.dart\n2. Replace with your Supabase URL and anon key\n\nOR use environment variables:\nflutter run --dart-define=SUPABASE_URL=your-url',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    style: TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Manrope'),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),

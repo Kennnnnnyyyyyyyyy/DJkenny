@@ -69,9 +69,9 @@ class _QonversionScreenState extends State<QonversionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'MELO AI Music',
+                        'Melo AI Music',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: 'Manrope',
                           color: Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class _QonversionScreenState extends State<QonversionScreen> {
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          fontFamily: 'Inter',
+                          fontFamily: 'Manrope',
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -116,23 +116,23 @@ class _QonversionScreenState extends State<QonversionScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           onPressed: () {},
-                          child: const Text('Continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                          child: const Text('Continue', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Manrope')),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Center(
                         child: Column(
                           children: [
-                            Text('₹6,900.00/year. Cancel anytime', style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Inter')),
+                            Text('₹6,900.00/year. Cancel anytime', style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'Manrope')),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Restore Purchase', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
+                                Text('Restore Purchase', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Manrope')),
                                 const SizedBox(width: 12),
-                                Text('Terms of Use', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
+                                Text('Terms of Use', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Manrope')),
                                 const SizedBox(width: 12),
-                                Text('Privacy Policy', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Inter')),
+                                Text('Privacy Policy', style: TextStyle(color: Colors.deepPurpleAccent, fontSize: 12, fontFamily: 'Manrope')),
                               ],
                             ),
                           ],
@@ -164,7 +164,7 @@ class _FeatureText extends StatelessWidget {
         children: [
           const Icon(Icons.check, color: Colors.deepPurple, size: 20),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(fontSize: 16, color: Colors.white, fontFamily: 'Inter')),
+          Text(text, style: const TextStyle(fontSize: 16, color: Colors.white, fontFamily: 'Manrope')),
         ],
       ),
     );
@@ -234,7 +234,7 @@ class _StackedPlanCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Manrope')),
                     if (selected)
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
@@ -245,14 +245,14 @@ class _StackedPlanCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(price, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
-                    Text(period, style: const TextStyle(color: Colors.white70, fontSize: 16, fontFamily: 'Inter')),
+                    Text(price, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Manrope')),
+                    Text(period, style: const TextStyle(color: Colors.white70, fontSize: 16, fontFamily: 'Manrope')),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(subPrice, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, fontFamily: 'Inter')),
+                Text(subPrice, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14, fontFamily: 'Manrope')),
                 const SizedBox(height: 6),
-                Text('Unlimited song creation', style: TextStyle(color: selected ? Colors.greenAccent : Colors.white70, fontSize: 14, fontFamily: 'Inter')),
+                Text('Unlimited song creation', style: TextStyle(color: selected ? Colors.greenAccent : Colors.white70, fontSize: 14, fontFamily: 'Manrope')),
               ],
             ),
           ),

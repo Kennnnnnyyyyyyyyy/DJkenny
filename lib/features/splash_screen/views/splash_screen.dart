@@ -39,11 +39,14 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Press Play, Escape Ordinary',
+              'Melo AI',
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall
-                  ?.copyWith(color: Colors.white),
+                  ?.copyWith(
+                    color: Colors.white,
+                    fontFamily: 'Manrope',
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),

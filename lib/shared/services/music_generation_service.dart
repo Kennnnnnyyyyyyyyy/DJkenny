@@ -34,7 +34,7 @@ class MusicGenerationService {
       );
 
       // Add user ID to payload
-      payload['user_id'] = _authService.currentUserId;
+      payload['user_id'] = _authService.currentUserId ?? 'anonymous';
 
       print('🎵 Calling supabase-suno Edge Function with payload: $payload');
 
@@ -43,24 +43,28 @@ class MusicGenerationService {
         'supabase-suno',
         body: payload,
         headers: {
-          'Authorization': 'Bearer ${_authService.accessToken}',
+          'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
           'Content-Type': 'application/json',
         },
       );
 
       print('🎵 Edge Function Response: ${response.data}');
 
-      if (response.status == 200) {
+      // ✅ Updated handling: Works with new backend response
+      final data = response.data;
+      final bool successFlag = data is Map && data['success'] == true;
+
+      if (successFlag || response.status == 200 || response.status == 202) {
         return {
           'success': true,
-          'data': response.data,
-          'message': 'Track generation started successfully!',
+          'message': data['message'] ?? 'Track generation started!',
+          'task_id': data['task_id'],
         };
       } else {
         return {
           'success': false,
-          'error': 'Failed to generate track: ${response.data}',
-          'message': 'Generation failed. Please try again.',
+          'message': data?['error'] ?? 'Generation failed. Please try again.',
+          'error': data,
         };
       }
     } catch (e) {
@@ -80,7 +84,7 @@ class MusicGenerationService {
         'supabase-suno',
         body: {'action': 'check_status', 'track_id': trackId},
         headers: {
-          'Authorization': 'Bearer ${_authService.accessToken}',
+          'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
           'Content-Type': 'application/json',
         },
       );
@@ -108,7 +112,7 @@ class MusicGenerationService {
   /// Get user's generated tracks from database
   Future<List<Map<String, dynamic>>> getUserTracks() async {
     try {
-      if (!_authService.isAuthenticated) {
+      if (!_authService.isAuthenticated || _authService.currentUserId == null) {
         return [];
       }
 
@@ -127,14 +131,26 @@ class MusicGenerationService {
 
   /// Subscribe to track updates for real-time status changes
   Stream<List<Map<String, dynamic>>> trackUpdatesStream() {
-    if (!_authService.isAuthenticated) {
-      return Stream.value([]);
-    }
+    try {
+      if (!_authService.isAuthenticated || _authService.currentUserId == null) {
+        print('❌ trackUpdatesStream: User not authenticated');
+        return Stream.value([]);
+      }
 
-    return _supabase
-        .from('tracks')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', _authService.currentUserId!)
-        .order('created_at', ascending: false);
+      print('🎵 trackUpdatesStream: Setting up stream for user ${_authService.currentUserId}');
+      
+      return _supabase
+          .from('tracks')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', _authService.currentUserId!)
+          .order('created_at', ascending: false)
+          .handleError((error) {
+            print('❌ trackUpdatesStream error: $error');
+            return [];
+          });
+    } catch (e) {
+      print('❌ trackUpdatesStream setup error: $e');
+      return Stream.error(e);
+    }
   }
 }

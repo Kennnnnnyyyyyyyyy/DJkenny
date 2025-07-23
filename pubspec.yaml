@@ -88,6 +88,9 @@ flutter:
         - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
         - asset: assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf
           style: italic
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-VariableFont_wght.ttf
     
 
   # To add assets to your application, add an assets section, like this:

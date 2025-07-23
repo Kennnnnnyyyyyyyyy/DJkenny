@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedTab = "Simple song";
   String selectedModel = "Melo 3.5";
+  String selectedCustomModel = "Melo V3.5"; // Separate variable for custom mode
   final TextEditingController lyricsController = TextEditingController();
   final TextEditingController styleController = TextEditingController();
   List<String> selectedStyles = [];
@@ -64,17 +65,18 @@ class _HomePageState extends State<HomePage> {
       final bool isCustomMode = selectedTab == "Custom song";
       final bool instrumentalToggle = selectedStyles.contains("Instrumental");
       final String styleInput = isCustomMode ? styleController.text.trim() : "";
+      final String currentModel = isCustomMode ? selectedCustomModel : selectedModel;
 
       print('🎵 Starting music generation...');
       print('📝 Prompt: $prompt');
-      print('🎛️ Model: $selectedModel');
+      print('🎛️ Model: $currentModel');
       print('🎨 Custom Mode: $isCustomMode');
       print('🎼 Instrumental: $instrumentalToggle');
 
       // Call the music generation service
       final result = await _musicService.generateTrack(
         prompt: prompt,
-        modelLabel: selectedModel,
+        modelLabel: currentModel,
         isCustomMode: isCustomMode,
         instrumentalToggle: instrumentalToggle,
         styleInput: styleInput,
@@ -144,65 +146,70 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: LayoutBuilder(
-          builder: (context, constraints) {
-            return Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Logo positioned slightly to the left
-                  Transform.translate(
-                    offset: const Offset(-4, 0), // Move logo 4px to the left
-                    child: Image.asset(
-                      'assets/music_logo.png',
-                      height: 42, // Larger size to grab attention
-                      fit: BoxFit.contain,
-                    ),
+        automaticallyImplyLeading: false, // Remove default leading behavior
+        flexibleSpace: SafeArea(
+          child: Stack(
+            children: [
+              // Centered title based on full screen width
+              const Center(
+                child: Text(
+                  "Melo AI",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    fontFamily: 'Manrope',
                   ),
-                  const SizedBox(width: 12), // Clean spacing between logo and text
-                  // Text stays centered
-                  const Text(
-                    "MELO AI",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/qonversion');
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "Pro",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+              // Pro button positioned on the right
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/qonversion');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/white_m.png',
+                            height: 18,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            "Pro",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Manrope',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       body: Stack(
         children: [
@@ -237,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12), // Reduced from 20 to 12 for tighter spacing
 
                     // Different content based on tab
                     if (selectedTab == "Custom song")
@@ -294,7 +301,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Song Prompts Dropdown + Label
+        // Song Prompts Label + Simple Dropdown
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -302,19 +309,53 @@ class _HomePageState extends State<HomePage> {
               "Song Prompts",
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Inter',
+                fontSize: 24, // Increased from 20 to 24 (+4 points)
+                fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
+                fontFamily: 'Manrope',
               ),
             ),
-            Expanded(
-              child: PillDropdownMenu(
-                value: selectedModel,
-                items: ["Melo 3.5", "Melo V4", "Melo V4.5"],
-                onChanged: (value) {
-                  setState(() => selectedModel = value);
-                },
-                gradientActive: true,
+            // Simple Dropdown - compact size, flat design
+            Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E), // Solid dark gray
+                borderRadius: BorderRadius.circular(10), // Slightly rounded
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedModel,
+                  items: ["Melo 3.5", "Melo V4", "Melo V4.5"].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Manrope',
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() => selectedModel = value!);
+                  },
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                  iconSize: 12,
+                  dropdownColor: const Color(0xFF2C2C2E),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Manrope',
+                  ),
+                ),
               ),
             ),
           ],
@@ -334,12 +375,12 @@ class _HomePageState extends State<HomePage> {
               TextField(
                 controller: lyricsController,
                 maxLines: 4,
-                style: const TextStyle(color: Colors.white, fontFamily: 'Inter'),
+                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText:
                       "A lyrical rock song about us walking through the woods, chasing freedom and dreams",
-                  hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Inter'),
+                  hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
                 ),
               ),
               const SizedBox(height: 8),
@@ -368,7 +409,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 6),
                     const Text(
                       "Inspiration",
-                      style: TextStyle(color: Colors.white, fontFamily: 'Inter'),
+                      style: TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                     ),
                   ],
                 ),
@@ -397,7 +438,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       color: Colors.white, 
                       fontSize: 16,
-                      fontFamily: 'Inter',
+                      fontFamily: 'Manrope',
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -430,25 +471,61 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Dropdown + Your Lyrics label
+        // Feed the AI Label + Simple Dropdown
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Your Lyrics",
+              "Feed the AI",
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter'),
+                  fontSize: 24, // Increased from 20 to 24 (+4 points)
+                  fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
+                  fontFamily: 'Manrope'),
             ),
-            PillDropdownMenu(
-              value: selectedModel,
-              items: ["Melo V3.5", "Melo V4.0", "Melo V4.5"],
-              onChanged: (value) {
-                setState(() => selectedModel = value);
-              },
-              gradientActive: true,
+            // Simple Dropdown - compact size, flat design
+            Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E), // Solid dark gray
+                borderRadius: BorderRadius.circular(10), // Slightly rounded
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedCustomModel,
+                  items: ["Melo V3.5", "Melo V4.0", "Melo V4.5"].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Manrope',
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() => selectedCustomModel = value!);
+                  },
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                  iconSize: 12,
+                  dropdownColor: const Color(0xFF2C2C2E),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Manrope',
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -468,11 +545,11 @@ class _HomePageState extends State<HomePage> {
               TextField(
                 controller: lyricsController,
                 maxLines: 4,
-                style: const TextStyle(color: Colors.white, fontFamily: 'Inter'),
+                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: "Enter your own lyrics",
-                  hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Inter'),
+                  hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
                 ),
               ),
               const SizedBox(height: 8),
@@ -489,14 +566,14 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 20),
-        // Describe of Style Text Box
+        // Shape the Sound Text Box
         const Text(
-          "Describe of style",
+          "Shape the Sound",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Inter',
+            fontSize: 24, // Increased from 20 to 24 (+4 points)
+            fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
+            fontFamily: 'Manrope',
           ),
         ),
         const SizedBox(height: 10),
@@ -509,11 +586,11 @@ class _HomePageState extends State<HomePage> {
           child: TextField(
             controller: styleController,
             maxLines: 3,
-            style: const TextStyle(color: Colors.white, fontFamily: 'Inter'),
+            style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
             decoration: const InputDecoration(
               border: InputBorder.none,
               hintText: "Describe the style you want (e.g. energetic pop, chill jazz, etc)",
-              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Inter'),
+              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
             ),
           ),
         ),
@@ -579,7 +656,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.white,
                     fontSize: 14, // Match input text size
                     fontWeight: FontWeight.w500, // Weight ~500 as requested
-                    fontFamily: 'Inter', // Match input font
+                    fontFamily: 'Manrope', // Match input font
                   ),
                 ),
               ],
