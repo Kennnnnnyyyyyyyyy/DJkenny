@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../home/widgets/gradient_cta_button.dart';
-import '../../../shared/widgets/track_card.dart';
 import '../../../shared/services/audio_player_service.dart';
 import '../../../shared/services/music_generation_service.dart';
+import '../../../shared/services/auth_service.dart';
 import '../../../shared/models/song.dart';
 
 class LibraryPage extends StatefulWidget {
@@ -14,47 +15,122 @@ class LibraryPage extends StatefulWidget {
 
 class _LibraryPageState extends State<LibraryPage> {
   final MusicGenerationService _musicService = MusicGenerationService();
-  bool _useStream = true;
+  final AudioPlayerService _audioPlayer = AudioPlayerService();
+  final AuthService _authService = AuthService();
+  
+  List<Song> _userSongs = [];
+  bool _isLoading = true;
+  String? _currentUserId;
+  String? _errorMessage;
+  
+  @override
+  void initState() {
+    super.initState();
+    _verifyUserAndLoadLibrary();
+  }
   
   @override
   void dispose() {
     // Clean up audio player when leaving library
-    AudioPlayerService().stop();
+    _audioPlayer.stop();
     super.dispose();
   }
 
-  Widget _buildLibraryContent() {
-    print('🎵 Building library content, useStream: $_useStream');
-    
-    // For now, let's always use FutureBuilder to avoid stream issues
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _musicService.getUserTracks(),
-      builder: (context, snapshot) {
-        print('🎵 Library FutureBuilder state: ${snapshot.connectionState}');
-        if (snapshot.hasError) {
-          print('❌ Library Future Error: ${snapshot.error}');
-        }
-        if (snapshot.hasData) {
-          print('🎵 Library Future Data: ${snapshot.data?.length} tracks');
-        }
+  Future<void> _verifyUserAndLoadLibrary() async {
+    try {
+      setState(() => _isLoading = true);
+      
+      // Get and verify current user ID
+      _currentUserId = _authService.currentUserId;
+      
+      print('🔍 Auth verification:');
+      print('   Current User ID: $_currentUserId');
+      print('   Is user authenticated: ${_currentUserId != null && _currentUserId!.isNotEmpty}');
+      
+      if (_currentUserId == null || _currentUserId!.isEmpty) {
+        print('❌ No authenticated user found for library');
+        setState(() {
+          _userSongs = [];
+          _isLoading = false;
+          _errorMessage = 'No authenticated user';
+        });
         
-        return _buildLibraryUI(snapshot);
-      },
-    );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please log in to access your library'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      print('📚 Loading library for authenticated user: $_currentUserId');
+      
+      // Fetch user-specific songs with debugging
+      final songs = await _musicService.getUserLibrarySongs();
+      
+      print('✅ Library loaded:');
+      print('   Songs found: ${songs.length}');
+      print('   User songs for $_currentUserId:');
+      for (var song in songs) {
+        print('     - ${song.title} (ID: ${song.id}, User: ${song.userId})');
+      }
+      
+      setState(() {
+        _userSongs = songs;
+        _isLoading = false;
+        _errorMessage = null;
+      });
+      
+    } catch (e) {
+      print('❌ Error loading user library: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString();
+      });
+    }
   }
 
-  Widget _buildLibraryUI(AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
+
+
+  Future<void> _playSong(Song song) async {
+    try {
+      if (song.publicUrl.isEmpty) {
+        print('❌ No audio URL available for song: ${song.title}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No audio available for this song')),
+          );
+        }
+        return;
+      }
+      
+      print('🎵 Playing user song: ${song.title} with URL: ${song.publicUrl}');
+      await _audioPlayer.playTrack(song.id, song.publicUrl);
+    } catch (e) {
+      print('❌ Error playing song: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to play song: $e')),
+        );
+      }
+    }
+  }
+
+  Widget _buildLibraryContent() {
+    print('🎵 Building library content');
+    
+    if (_isLoading) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: Colors.white,
-            ),
+            CircularProgressIndicator(color: Color(0xFFFF4AE2)),
             SizedBox(height: 16),
             Text(
-              'Loading library...',
+              'Loading your library...',
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Manrope',
@@ -65,8 +141,7 @@ class _LibraryPageState extends State<LibraryPage> {
       );
     }
     
-    if (snapshot.hasError) {
-      print('❌ Library error details: ${snapshot.error}');
+    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -79,7 +154,7 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              snapshot.error.toString(),
+              _errorMessage!,
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 12,
@@ -90,18 +165,19 @@ class _LibraryPageState extends State<LibraryPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                setState(() {}); // Rebuild to retry
+                _verifyUserAndLoadLibrary(); // Retry loading
               },
-              child: Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF4AE2),
+              ),
+              child: const Text('Retry'),
             ),
           ],
         ),
       );
     }
     
-    final tracks = snapshot.data ?? [];
-    
-    if (tracks.isEmpty) {
+    if (_userSongs.isEmpty) {
       return Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -116,7 +192,18 @@ class _LibraryPageState extends State<LibraryPage> {
               Icon(Icons.library_music, color: Colors.white, size: 48),
               const SizedBox(height: 16),
               Text(
-                'Create your first song\nand it will be displayed here.',
+                'Your library is empty',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Manrope',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Create your first song\nand it will appear here!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.7), 
@@ -137,26 +224,131 @@ class _LibraryPageState extends State<LibraryPage> {
       );
     }
     
-    // Convert maps to Song objects and create TrackCards
-    return GridView.extent(
-      maxCrossAxisExtent: 280,
-      padding: const EdgeInsets.all(16),
-      children: tracks.map((trackData) {
-        try {
-          final song = Song.fromMap(trackData);
-          return TrackCard(song);
-        } catch (e) {
-          print('❌ Error creating Song from data: $e');
-          print('❌ Track data: $trackData');
-          return Container(
-            padding: EdgeInsets.all(8),
-            child: Text(
-              'Error loading track',
-              style: TextStyle(color: Colors.red),
-            ),
+    // Display user's songs in a grid
+    return RefreshIndicator(
+      onRefresh: _verifyUserAndLoadLibrary,
+      color: const Color(0xFFFF4AE2),
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: _userSongs.length,
+        itemBuilder: (context, index) {
+          final song = _userSongs[index];
+          
+          return StreamBuilder<PlayerState>(
+            stream: _audioPlayer.playerStateStream,
+            builder: (context, stateSnapshot) {
+              final currentTrackId = _audioPlayer.currentTrackId;
+              final isCurrentTrack = currentTrackId == song.id;
+              final isPlaying = isCurrentTrack && _audioPlayer.isPlaying;
+              
+              return GestureDetector(
+                onTap: () => _playSong(song),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1E),
+                    borderRadius: BorderRadius.circular(16),
+                    border: isCurrentTrack 
+                        ? Border.all(color: const Color(0xFFFF4AE2), width: 2)
+                        : Border.all(color: Colors.grey.shade800, width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      // Cover Art Area
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isCurrentTrack 
+                                  ? [const Color(0xFFFF4AE2), const Color(0xFF7A4BFF)]
+                                  : [Colors.grey.shade800, Colors.grey.shade700],
+                            ),
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          ),
+                          child: Stack(
+                            children: [
+                              const Center(
+                                child: Icon(
+                                  Icons.music_note,
+                                  color: Colors.white,
+                                  size: 48,
+                                ),
+                              ),
+                              // Play button overlay
+                              Center(
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isPlaying ? Icons.pause : Icons.play_arrow,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      // Song Info
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              song.title.isNotEmpty ? song.title : 'Untitled',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Manrope',
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            if (song.style.isNotEmpty)
+                              Text(
+                                song.style.join(', '),
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                  fontFamily: 'Manrope',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            Text(
+                              song.instrumental ? 'Instrumental' : 'With vocals',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10,
+                                fontFamily: 'Manrope',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
-        }
-      }).toList(),
+        },
+      ),
     );
   }
 
@@ -172,15 +364,30 @@ class _LibraryPageState extends State<LibraryPage> {
           child: Stack(
             children: [
               // Centered title based on full screen width
-              const Center(
-                child: Text(
-                  'Library',
-                  style: TextStyle(
-                    color: Colors.white, 
-                    fontSize: 32, 
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Manrope',
-                  ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Library',
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 32, 
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Manrope',
+                      ),
+                    ),
+                    // Debug info showing current user ID
+                    if (_currentUserId != null)
+                      Text(
+                        'User: ${_currentUserId!.substring(0, 8)}...',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontFamily: 'Manrope',
+                        ),
+                      ),
+                  ],
                 ),
               ),
               // Pro button positioned on the right
@@ -232,24 +439,129 @@ class _LibraryPageState extends State<LibraryPage> {
         ),
       ),
       body: _buildLibraryContent(),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushNamed(context, '/home');
-          } else if (index == 1) {
-            Navigator.pushNamed(context, '/explore');
-          } else if (index == 2) {
-            // Already on Library
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Mini Player (when song is playing)
+          StreamBuilder<PlayerState>(
+            stream: _audioPlayer.playerStateStream,
+            builder: (context, snapshot) {
+              final currentTrackId = _audioPlayer.currentTrackId;
+              
+              if (currentTrackId == null || !_audioPlayer.isPlaying) {
+                return const SizedBox.shrink();
+              }
+
+              // Find the current song from our user's library
+              final currentSong = _userSongs.isNotEmpty 
+                ? _userSongs.firstWhere(
+                    (song) => song.id == currentTrackId,
+                    orElse: () => Song.fromMap({
+                      'id': currentTrackId,
+                      'title': 'Unknown Song',
+                      'public_url': '',
+                      'style': '',
+                      'instrumental': false,
+                      'model': '',
+                      'user_id': '',
+                    }),
+                  )
+                : Song.fromMap({
+                    'id': currentTrackId,
+                    'title': 'Unknown Song', 
+                    'public_url': '',
+                    'style': '',
+                    'instrumental': false,
+                    'model': '',
+                    'user_id': '',
+                  });
+
+              return Container(
+                color: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
+                          ),
+                        ),
+                        child: const Icon(Icons.music_note, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            currentSong.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'Manrope',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Text(
+                            'Your Creation',
+                            style: TextStyle(
+                              color: Colors.white70, 
+                              fontSize: 13,
+                              fontFamily: 'Manrope',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _audioPlayer.isPlaying ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        if (_audioPlayer.isPlaying) {
+                          _audioPlayer.pause();
+                        } else {
+                          _audioPlayer.resume();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          
+          // Bottom Navigation
+          BottomNavigationBar(
+            backgroundColor: Colors.black,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.grey,
+            currentIndex: 2,
+            onTap: (index) {
+              if (index == 0) {
+                Navigator.pushNamed(context, '/home');
+              } else if (index == 1) {
+                Navigator.pushNamed(context, '/explore');
+              } else if (index == 2) {
+                // Already on Library
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
+              BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+              BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
+            ],
+          ),
         ],
       ),
     );

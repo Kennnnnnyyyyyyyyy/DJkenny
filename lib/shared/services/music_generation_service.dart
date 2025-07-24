@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../services/suno_payload.dart';
+import '../models/song.dart';
 
 class MusicGenerationService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -33,10 +34,11 @@ class MusicGenerationService {
         negativeTags: negativeTags,
       );
 
-      // Add user ID to payload
-      payload['user_id'] = _authService.currentUserId ?? 'anonymous';
+      // DON'T add user_id to payload - Edge Function will get it from auth context
+      // payload['user_id'] = _authService.currentUserId ?? 'anonymous';
 
       print('🎵 Calling supabase-suno Edge Function with payload: $payload');
+      print('JWT TOKEN: ${_authService.accessToken}');
 
       // Call the Supabase Edge Function
       final response = await _supabase.functions.invoke(
@@ -109,20 +111,20 @@ class MusicGenerationService {
     }
   }
 
-  /// Get user's generated tracks from database
+  /// Get user's generated tracks from database (legacy method - use getUserLibrarySongs for better filtering)
   Future<List<Map<String, dynamic>>> getUserTracks() async {
     try {
-      if (!_authService.isAuthenticated || _authService.currentUserId == null) {
-        return [];
-      }
-
-      final response = await _supabase
-          .from('tracks')
-          .select('*')
-          .eq('user_id', _authService.currentUserId!)
-          .order('created_at', ascending: false);
-
-      return List<Map<String, dynamic>>.from(response);
+      // Delegate to the new user library method for consistency
+      final songs = await getUserLibrarySongs();
+      return songs.map((song) => {
+        'id': song.id,
+        'user_id': song.userId,
+        'title': song.title,
+        'public_url': song.publicUrl,
+        'style': song.style.join(','),
+        'instrumental': song.instrumental,
+        'model': song.model,
+      }).toList();
     } catch (e) {
       print('❌ Get User Tracks Error: $e');
       return [];
@@ -151,6 +153,110 @@ class MusicGenerationService {
     } catch (e) {
       print('❌ trackUpdatesStream setup error: $e');
       return Stream.error(e);
+    }
+  }
+
+  /// Get explore songs with specific apiboxfiles URL format
+  Future<List<Song>> getExploreSongs({int limit = 50}) async {
+    try {
+      print('🔍 Fetching explore songs with apiboxfiles URLs...');
+      
+      final response = await _supabase
+          .from('songs')
+          .select('*')
+          .not('public_url', 'is', null)
+          .not('public_url', 'eq', '')
+          .like('public_url', '%apiboxfiles.erweima.ai%')
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      print('📊 Raw explore response: $response');
+
+      if (response.isEmpty) {
+        print('❌ Empty response from explore query');
+        return [];
+      }
+
+      final songs = (response as List).map((track) {
+        try {
+          return Song.fromMap(track);
+        } catch (e) {
+          print('❌ Error converting track to Song: $e');
+          print('📊 Problematic track data: $track');
+          return null;
+        }
+      }).where((song) => song != null).cast<Song>().toList();
+
+      print('✅ Processed ${songs.length} explore songs');
+      
+      // Double-check that all songs have the specific URL format
+      final validSongs = songs.where((song) => 
+        song.publicUrl.isNotEmpty && 
+        song.publicUrl.contains('apiboxfiles.erweima.ai')
+      ).toList();
+      
+      print('✅ Found ${validSongs.length} songs with valid apiboxfiles URLs');
+      
+      return validSongs;
+    } catch (e) {
+      print('❌ Error fetching explore songs: $e');
+      return [];
+    }
+  }
+
+  /// Get songs for the current user's library (user-specific)
+  Future<List<Song>> getUserLibrarySongs({int limit = 100}) async {
+    try {
+      final currentUserId = _authService.currentUserId;
+      if (currentUserId == null || currentUserId.isEmpty) {
+        print('❌ No authenticated user found');
+        return [];
+      }
+
+      print('🔍 Fetching library songs for user: $currentUserId');
+      
+      final response = await _supabase
+          .from('songs')
+          .select('*')
+          .eq('user_id', currentUserId)
+          .not('public_url', 'is', null)
+          .not('public_url', 'eq', '')
+          .like('public_url', '%apiboxfiles.erweima.ai%')
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      print('📊 Raw library response for user $currentUserId: $response');
+
+      if (response.isEmpty) {
+        print('❌ Empty response from library query');
+        return [];
+      }
+
+      final songs = (response as List).map((track) {
+        try {
+          return Song.fromMap(track);
+        } catch (e) {
+          print('❌ Error converting track to Song: $e');
+          print('📊 Problematic track data: $track');
+          return null;
+        }
+      }).where((song) => song != null).cast<Song>().toList();
+
+      print('✅ Processed ${songs.length} library songs for user $currentUserId');
+      
+      // Double-check that all songs belong to current user and have valid URLs
+      final validSongs = songs.where((song) => 
+        song.publicUrl.isNotEmpty && 
+        song.publicUrl.contains('apiboxfiles.erweima.ai') &&
+        song.userId == currentUserId
+      ).toList();
+      
+      print('✅ Found ${validSongs.length} valid library songs for user $currentUserId');
+      
+      return validSongs;
+    } catch (e) {
+      print('❌ Error fetching library songs: $e');
+      return [];
     }
   }
 }
