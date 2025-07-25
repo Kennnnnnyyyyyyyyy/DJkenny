@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Privacy Usage Descriptions for App Store -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Melo AI Music uses the microphone to create AI-generated music based on your voice input and audio preferences.</string>
+	
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This app accesses your music library to enhance your music creation experience and provide better AI-generated recommendations.</string>
+	
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Melo AI Music needs photo access to set custom album artwork for your generated music tracks.</string>
+	
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to capture custom album artwork for your AI-generated music.</string>
+	
+	<!-- Background Audio Support -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

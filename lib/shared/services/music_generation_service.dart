@@ -23,8 +23,13 @@ class MusicGenerationService {
         await _authService.signInAnonymously();
       }
 
-      // Build the payload using the existing suno_payload service
-      final payload = buildSunoPayload(
+      final currentUserId = _authService.currentUserId;
+      if (currentUserId == null || currentUserId.isEmpty) {
+        throw Exception('User not authenticated - cannot generate track');
+      }
+
+      // Build the payload using the existing suno_payload service (for Suno API only)
+      final sunoPayload = buildSunoPayload(
         prompt: prompt,
         modelLabel: modelLabel,
         isCustomMode: isCustomMode,
@@ -34,16 +39,30 @@ class MusicGenerationService {
         negativeTags: negativeTags,
       );
 
-      // DON'T add user_id to payload - Edge Function will get it from auth context
-      // payload['user_id'] = _authService.currentUserId ?? 'anonymous';
+      // Create the complete payload for Edge Function
+      // This includes both Suno parameters AND user metadata
+      final edgeFunctionPayload = {
+        // Suno API parameters
+        ...sunoPayload,
+        
+        // User metadata (NOT sent to Suno API)
+        'user_id': currentUserId,
+        'user_metadata': {
+          'user_id': currentUserId,
+          'timestamp': DateTime.now().toIso8601String(),
+        }
+      };
 
-      print('🎵 Calling supabase-suno Edge Function with payload: $payload');
-      print('JWT TOKEN: ${_authService.accessToken}');
+      print('🎵 Calling supabase-suno Edge Function');
+      print('   User ID: $currentUserId');
+      print('   Suno Payload: $sunoPayload');
+      print('   Full Edge Function Payload: $edgeFunctionPayload');
+      print('   JWT TOKEN: ${_authService.accessToken}');
 
       // Call the Supabase Edge Function
       final response = await _supabase.functions.invoke(
         'supabase-suno',
-        body: payload,
+        body: edgeFunctionPayload,
         headers: {
           'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
           'Content-Type': 'application/json',
@@ -61,6 +80,7 @@ class MusicGenerationService {
           'success': true,
           'message': data['message'] ?? 'Track generation started!',
           'task_id': data['task_id'],
+          'user_id': currentUserId,
         };
       } else {
         return {
