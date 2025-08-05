@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:music_app/features/home/views/home_page.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -15,12 +16,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    /// Wait 3 seconds, then navigate to Home
+    /// Wait 3 seconds, then navigate to OnboardingPage2 (Song carousel)
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
+      if (mounted) {
+        print('🔄 Navigating from OnboardingPage1 to OnboardingPage2...');
+        context.go('/onboarding2');
+      }
     });
   }
 
@@ -51,6 +52,44 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 40),
+            // Debug button to test onboarding 2
+            ElevatedButton(
+              onPressed: () {
+                context.go('/onboarding2');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6FD8),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Test Onboarding 2'),
+            ),
+            const SizedBox(height: 10),
+            // Test Onboarding 1 button
+            ElevatedButton(
+              onPressed: () {
+                context.go('/onboarding1');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7A4BFF),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Test Onboarding 1'),
+            ),
+            const SizedBox(height: 10),
+            // Reset onboarding button
+            ElevatedButton(
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('onboarding_completed');
+                print('🔄 Onboarding reset! Restart the app to see onboarding flow.');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Reset Onboarding'),
+            ),
           ],
         ),
       ),

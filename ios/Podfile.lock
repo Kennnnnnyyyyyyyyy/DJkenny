@@ -3,7 +3,11 @@ PODS:
     - Flutter
   - audio_session (0.0.1):
     - Flutter
+  - audio_visualizer (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
+  - flutter_native_splash (2.4.3):
+    - Flutter
   - just_audio (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -24,6 +28,12 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - Superscript (0.2.8)
+  - SuperwallKit (4.5.2):
+    - Superscript (= 0.2.8)
+  - superwallkit_flutter (0.0.1):
+    - Flutter
+    - SuperwallKit (= 4.5.2)
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -33,11 +43,14 @@ PODS:
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - audio_visualizer (from `.symlinks/plugins/audio_visualizer/ios`)
   - Flutter (from `Flutter`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - qonversion_flutter (from `.symlinks/plugins/qonversion_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - superwallkit_flutter (from `.symlinks/plugins/superwallkit_flutter/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
 
@@ -46,14 +59,20 @@ SPEC REPOS:
     - NoCodes
     - Qonversion
     - QonversionSandwich
+    - Superscript
+    - SuperwallKit
 
 EXTERNAL SOURCES:
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  audio_visualizer:
+    :path: ".symlinks/plugins/audio_visualizer/ios"
   Flutter:
     :path: Flutter
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   just_audio:
     :path: ".symlinks/plugins/just_audio/darwin"
   path_provider_foundation:
@@ -62,6 +81,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/qonversion_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  superwallkit_flutter:
+    :path: ".symlinks/plugins/superwallkit_flutter/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
@@ -70,7 +91,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  audio_visualizer: 78ca87f1b10ae05a54c4e79bb52c1bb3718bf7ce
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   NoCodes: 21b87d320a16758c6eb79167ff98010d81b4894e
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
@@ -78,9 +101,12 @@ SPEC CHECKSUMS:
   qonversion_flutter: d55ac03001bfd265eae4a520ace37df41cc005d7
   QonversionSandwich: 1ac99e13f94254da2e7cec1c39814dca3c611db3
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  Superscript: 82dbb40f502823160e75503ebc1b6bac756a503d
+  SuperwallKit: 520fd9dff39358c9708d88cc69c1f4fbd32b3008
+  superwallkit_flutter: 24189eddf53053b67bb8a909556fca71140665c4
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce
+PODFILE CHECKSUM: 6c01055ff966e40e8862373e66668a0fbf0b7ba8
 
 COCOAPODS: 1.16.2

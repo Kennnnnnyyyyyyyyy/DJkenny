@@ -1,49 +1,60 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:music_app/features/onboarding/views/onboarding_page_1.dart';
 
-class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+class SplashIntro extends StatefulWidget {
+  const SplashIntro({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  State<SplashIntro> createState() => _SplashIntroState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _SplashIntroState extends State<SplashIntro> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/home');
+    
+    // Navigate to OnboardingPage1 after 3 seconds
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const OnboardingPage1(),
+        ),
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/vecteezy_night-club-dj-wearing-headphones-under-party-lights_27447062.jpg'),
-                  fit: BoxFit.cover, // This ensures the image covers the entire screen
-                  alignment: Alignment.center,
-                ),
-              ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/vecteezy_night-club-dj-wearing-headphones-under-party-lights_27447062.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.3),
+                Colors.black.withOpacity(0.7),
+              ],
             ),
           ),
-          Center(
+          child: Center(
             child: Image.asset(
               'assets/music_logo.png',
-              width: 150,
-              height: 150,
+              width: 140,
+              height: 140,
               fit: BoxFit.contain,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import '../../home/widgets/gradient_cta_button.dart';
-import '../../../shared/services/audio_player_service.dart';
-import '../../../shared/services/music_generation_service.dart';
-import '../../../shared/services/auth_service.dart';
-import '../../../shared/models/song.dart';
+import 'package:music_app/features/home/widgets/gradient_cta_button.dart';
+import 'package:music_app/shared/services/audio_player_service.dart';
+import 'package:music_app/shared/services/music_generation_service.dart';
+import 'package:music_app/shared/services/auth_service.dart';
+import 'package:music_app/shared/models/song.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -354,216 +354,17 @@ class _LibraryPageState extends State<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping anywhere on screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
         backgroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Remove default leading behavior
-        flexibleSpace: SafeArea(
-          child: Stack(
-            children: [
-              // Centered title based on full screen width
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Library',
-                      style: TextStyle(
-                        color: Colors.white, 
-                        fontSize: 32, 
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Manrope',
-                      ),
-                    ),
-                    // Debug info showing current user ID
-                    if (_currentUserId != null)
-                      Text(
-                        'User: ${_currentUserId!.substring(0, 8)}...',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                          fontFamily: 'Manrope',
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              // Pro button positioned on the right
-              Positioned(
-                right: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/qonversion');
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/white_m.png',
-                            height: 18,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'Pro',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Manrope',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        body: SafeArea(
+          child: _buildLibraryContent(),
         ),
-      ),
-      body: _buildLibraryContent(),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Mini Player (when song is playing)
-          StreamBuilder<PlayerState>(
-            stream: _audioPlayer.playerStateStream,
-            builder: (context, snapshot) {
-              final currentTrackId = _audioPlayer.currentTrackId;
-              
-              if (currentTrackId == null || !_audioPlayer.isPlaying) {
-                return const SizedBox.shrink();
-              }
-
-              // Find the current song from our user's library
-              final currentSong = _userSongs.isNotEmpty 
-                ? _userSongs.firstWhere(
-                    (song) => song.id == currentTrackId,
-                    orElse: () => Song.fromMap({
-                      'id': currentTrackId,
-                      'title': 'Unknown Song',
-                      'public_url': '',
-                      'style': '',
-                      'instrumental': false,
-                      'model': '',
-                      'user_id': '',
-                    }),
-                  )
-                : Song.fromMap({
-                    'id': currentTrackId,
-                    'title': 'Unknown Song', 
-                    'public_url': '',
-                    'style': '',
-                    'instrumental': false,
-                    'model': '',
-                    'user_id': '',
-                  });
-
-              return Container(
-                color: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
-                          ),
-                        ),
-                        child: const Icon(Icons.music_note, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            currentSong.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'Manrope',
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const Text(
-                            'Your Creation',
-                            style: TextStyle(
-                              color: Colors.white70, 
-                              fontSize: 13,
-                              fontFamily: 'Manrope',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _audioPlayer.isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                      onPressed: () {
-                        if (_audioPlayer.isPlaying) {
-                          _audioPlayer.pause();
-                        } else {
-                          _audioPlayer.resume();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          
-          // Bottom Navigation
-          BottomNavigationBar(
-            backgroundColor: Colors.black,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.grey,
-            currentIndex: 2,
-            onTap: (index) {
-              if (index == 0) {
-                Navigator.pushNamed(context, '/home');
-              } else if (index == 1) {
-                Navigator.pushNamed(context, '/explore');
-              } else if (index == 2) {
-                // Already on Library
-              }
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
-              BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-              BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
-            ],
-          ),
-        ],
-      ),
-    );
+      ), // Close Scaffold
+    ); // Close GestureDetector
   }
 }

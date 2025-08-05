@@ -1,13 +1,41 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../services/suno_payload.dart';
+import '../services/goapi_payload.dart';
 import '../models/song.dart';
 
 class MusicGenerationService {
   final SupabaseClient _supabase = Supabase.instance.client;
   final AuthService _authService = AuthService();
 
-  /// Generate music track using Supabase Edge Function
+  /// Determine if model should use GoAPI
+  /// Models 3.5 to 4.5 use Suno, others use GoAPI
+  bool _shouldUseGoApi(String modelLabel) {
+    // Extract version number from model label
+    final RegExp versionRegex = RegExp(r'(\d+\.?\d*)');
+    final match = versionRegex.firstMatch(modelLabel);
+    
+    if (match != null) {
+      final version = double.tryParse(match.group(1) ?? '0');
+      if (version != null) {
+        // Use Suno for versions 3.5 to 4.5, GoAPI for others
+        return version < 3.5 || version > 4.5;
+      }
+    }
+    
+    // Check for specific model names that should use GoAPI
+    final lowerModelLabel = modelLabel.toLowerCase();
+    if (lowerModelLabel.contains('goapi') || 
+        lowerModelLabel.contains('qubico') || 
+        lowerModelLabel.contains('diffrhythm')) {
+      return true;
+    }
+    
+    // Default to Suno if version can't be determined
+    return false;
+  }
+
+  /// Generate music track using appropriate API based on model
   Future<Map<String, dynamic>> generateTrack({
     required String prompt,
     required String modelLabel,
@@ -23,71 +51,32 @@ class MusicGenerationService {
         await _authService.signInAnonymously();
       }
 
-      final currentUserId = _authService.currentUserId;
-      if (currentUserId == null || currentUserId.isEmpty) {
-        throw Exception('User not authenticated - cannot generate track');
-      }
+      print('JWT TOKEN: ${_authService.accessToken}');
 
-      // Build the payload using the existing suno_payload service (for Suno API only)
-      final sunoPayload = buildSunoPayload(
-        prompt: prompt,
-        modelLabel: modelLabel,
-        isCustomMode: isCustomMode,
-        instrumentalToggle: instrumentalToggle,
-        styleInput: styleInput,
-        title: title,
-        negativeTags: negativeTags,
-      );
-
-      // Create the complete payload for Edge Function
-      // This includes both Suno parameters AND user metadata
-      final edgeFunctionPayload = {
-        // Suno API parameters
-        ...sunoPayload,
-        
-        // User metadata (NOT sent to Suno API)
-        'user_id': currentUserId,
-        'user_metadata': {
-          'user_id': currentUserId,
-          'timestamp': DateTime.now().toIso8601String(),
-        }
-      };
-
-      print('🎵 Calling supabase-suno Edge Function');
-      print('   User ID: $currentUserId');
-      print('   Suno Payload: $sunoPayload');
-      print('   Full Edge Function Payload: $edgeFunctionPayload');
-      print('   JWT TOKEN: ${_authService.accessToken}');
-
-      // Call the Supabase Edge Function
-      final response = await _supabase.functions.invoke(
-        'supabase-suno',
-        body: edgeFunctionPayload,
-        headers: {
-          'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      print('🎵 Edge Function Response: ${response.data}');
-
-      // ✅ Updated handling: Works with new backend response
-      final data = response.data;
-      final bool successFlag = data is Map && data['success'] == true;
-
-      if (successFlag || response.status == 200 || response.status == 202) {
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Track generation started!',
-          'task_id': data['task_id'],
-          'user_id': currentUserId,
-        };
+      // Determine which API to use
+      final useGoApi = _shouldUseGoApi(modelLabel);
+      print('🎵 Using ${useGoApi ? "GoAPI" : "Suno"} for model: $modelLabel');
+      
+      if (useGoApi) {
+        return await _generateWithGoApi(
+          prompt: prompt,
+          modelLabel: modelLabel,
+          isCustomMode: isCustomMode,
+          instrumentalToggle: instrumentalToggle,
+          styleInput: styleInput,
+          title: title,
+          negativeTags: negativeTags,
+        );
       } else {
-        return {
-          'success': false,
-          'message': data?['error'] ?? 'Generation failed. Please try again.',
-          'error': data,
-        };
+        return await _generateWithSuno(
+          prompt: prompt,
+          modelLabel: modelLabel,
+          isCustomMode: isCustomMode,
+          instrumentalToggle: instrumentalToggle,
+          styleInput: styleInput,
+          title: title,
+          negativeTags: negativeTags,
+        );
       }
     } catch (e) {
       print('❌ Music Generation Error: $e');
@@ -95,6 +84,144 @@ class MusicGenerationService {
         'success': false,
         'error': e.toString(),
         'message': 'Something went wrong. Please check your connection.',
+      };
+    }
+  }
+
+  /// Generate using GoAPI
+  Future<Map<String, dynamic>> _generateWithGoApi({
+    required String prompt,
+    required String modelLabel,
+    required bool isCustomMode,
+    required bool instrumentalToggle,
+    required String styleInput,
+    String title = '',
+    String negativeTags = '',
+  }) async {
+    final currentUserId = _authService.currentUserId;
+    if (currentUserId == null || currentUserId.isEmpty) {
+      throw Exception('User not authenticated - cannot generate track');
+    }
+
+    // Build the GoAPI payload
+    final payload = buildGoApiPayload(
+      prompt: prompt,
+      modelLabel: modelLabel,
+      isCustomMode: isCustomMode,
+      instrumentalToggle: instrumentalToggle,
+      styleInput: styleInput,
+      title: title,
+      negativeTags: negativeTags,
+    );
+
+    // Add user ID to payload
+    payload['user_id'] = currentUserId;
+
+    print('🎵 Calling GoAPI Edge Function with payload: $payload');
+
+    // Call the GoAPI Edge Function
+    final response = await _supabase.functions.invoke(
+      'goapi-service', // New edge function for GoAPI
+      body: payload,
+      headers: {
+        'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('🎵 GoAPI Edge Function Response: ${response.data}');
+
+    final data = response.data;
+    final bool successFlag = data is Map && data['success'] == true;
+
+    if (successFlag || response.status == 200 || response.status == 202) {
+      return {
+        'success': true,
+        'message': data['message'] ?? 'Track generation started with GoAPI!',
+        'task_id': data['task_id'],
+        'api_type': 'goapi',
+        'user_id': currentUserId,
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data?['error'] ?? 'GoAPI generation failed. Please try again.',
+        'error': data,
+      };
+    }
+  }
+
+  /// Generate using Suno API (existing logic)
+  Future<Map<String, dynamic>> _generateWithSuno({
+    required String prompt,
+    required String modelLabel,
+    required bool isCustomMode,
+    required bool instrumentalToggle,
+    required String styleInput,
+    String title = '',
+    String negativeTags = '',
+  }) async {
+    final currentUserId = _authService.currentUserId;
+    if (currentUserId == null || currentUserId.isEmpty) {
+      throw Exception('User not authenticated - cannot generate track');
+    }
+
+    // Build the payload using the existing suno_payload service
+    final sunoPayload = buildSunoPayload(
+      prompt: prompt,
+      modelLabel: modelLabel,
+      isCustomMode: isCustomMode,
+      instrumentalToggle: instrumentalToggle,
+      styleInput: styleInput,
+      title: title,
+      negativeTags: negativeTags,
+    );
+
+    // Create the complete payload for Edge Function
+    // This includes both Suno parameters AND user metadata
+    final edgeFunctionPayload = {
+      // Suno API parameters
+      ...sunoPayload,
+      
+      // User metadata (NOT sent to Suno API)
+      'user_id': currentUserId,
+      'user_metadata': {
+        'user_id': currentUserId,
+        'timestamp': DateTime.now().toIso8601String(),
+      }
+    };
+
+    print('🎵 Calling Suno Edge Function with payload: $edgeFunctionPayload');
+
+    // Call the Supabase Edge Function
+    final response = await _supabase.functions.invoke(
+      'supabase-suno',
+      body: edgeFunctionPayload,
+      headers: {
+        'Authorization': 'Bearer ${_authService.accessToken ?? ''}',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('🎵 Suno Edge Function Response: ${response.data}');
+
+    // ✅ Updated handling: Works with new backend response
+    final data = response.data;
+    final bool successFlag = data is Map && data['success'] == true;
+
+    if (successFlag || response.status == 200 || response.status == 202) {
+      return {
+        'success': true,
+        'message': data['message'] ?? 'Track generation started with Suno!',
+        'task_id': data['task_id'],
+        'api_type': 'suno',
+        'user_id': currentUserId,
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data?['error'] ?? 'Suno generation failed. Please try again.',
+        'error': data,
       };
     }
   }

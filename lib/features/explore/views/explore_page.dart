@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import '../../../shared/services/music_generation_service.dart';
-import '../../../shared/services/audio_player_service.dart';
-import '../../../shared/models/song.dart';
+import 'package:music_app/shared/services/music_generation_service.dart';
+import 'package:music_app/shared/services/audio_player_service.dart';
+import 'package:music_app/shared/models/song.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -90,6 +90,7 @@ class _ExplorePageState extends State<ExplorePage> {
       
       print('🎵 Playing song: ${song.title} with URL: ${song.publicUrl}');
       await _audioPlayer.playTrack(song.id, song.publicUrl);
+      print('Music player tap - Explore');
     } catch (e) {
       print('❌ Error playing song: $e');
       if (mounted) {
@@ -102,28 +103,25 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping anywhere on screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
         backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
-          'Explore',
-          style: TextStyle(
-            color: Colors.white, 
-            fontSize: 26, 
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Manrope',
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        body: SafeArea(
+          child: Column(
+            children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) {
+                FocusScope.of(context).unfocus();
+              },
               decoration: InputDecoration(
                 hintText: 'Search songs, styles...',
                 hintStyle: const TextStyle(color: Colors.white54, fontFamily: 'Manrope'),
@@ -278,135 +276,8 @@ class _ExplorePageState extends State<ExplorePage> {
           ),
         ],
       ),
-      
-      // Bottom section with mini player and navigation
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Mini Player
-          StreamBuilder<PlayerState>(
-            stream: _audioPlayer.playerStateStream,
-            builder: (context, snapshot) {
-              final currentTrackId = _audioPlayer.currentTrackId;
-              
-              if (currentTrackId == null || !_audioPlayer.isPlaying) {
-                return const SizedBox.shrink();
-              }
-
-              // Find the current song from our list
-              final currentSong = _filteredSongs.isNotEmpty 
-                ? _filteredSongs.firstWhere(
-                    (song) => song.id == currentTrackId,
-                    orElse: () => _allSongs.firstWhere(
-                      (song) => song.id == currentTrackId,
-                      orElse: () => Song.fromMap({
-                        'id': currentTrackId,
-                        'title': 'Unknown Song',
-                        'public_url': '',
-                        'style': '',
-                        'instrumental': false,
-                        'model': '',
-                        'user_id': '',
-                      }),
-                    ),
-                  )
-                : Song.fromMap({
-                    'id': currentTrackId,
-                    'title': 'Unknown Song', 
-                    'public_url': '',
-                    'style': '',
-                    'instrumental': false,
-                    'model': '',
-                    'user_id': '',
-                  });
-
-              return Container(
-                color: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        color: Colors.grey.shade800,
-                        child: const Icon(Icons.music_note, color: Colors.white54),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            currentSong.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (currentSong.style.isNotEmpty)
-                            Text(
-                              currentSong.style.join(', '),
-                              style: const TextStyle(color: Colors.white70, fontSize: 13),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _audioPlayer.isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                      onPressed: () {
-                        if (_audioPlayer.isPlaying) {
-                          _audioPlayer.pause();
-                        } else {
-                          _audioPlayer.resume();
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.stop, color: Colors.white54),
-                      onPressed: () {
-                        _audioPlayer.stop();
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          
-          // Bottom Navigation
-          BottomNavigationBar(
-            backgroundColor: Colors.black,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.grey,
-            currentIndex: 1,
-            onTap: (index) {
-              if (index == 0) {
-                Navigator.pushNamed(context, '/home');
-              } else if (index == 1) {
-                // Already on Explore
-              } else if (index == 2) {
-                Navigator.pushNamed(context, '/library');
-              }
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
-              BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-              BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
-            ],
-          ),
-        ],
-      ),
+      ), // Close Scaffold
+      ), // Close GestureDetector
     );
   }
 }

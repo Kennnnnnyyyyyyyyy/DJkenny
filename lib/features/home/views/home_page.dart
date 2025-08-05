@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/gradient_cta_button.dart';
-import '../widgets/gradient_dropdown_menu.dart';
 import '../../../shared/widgets/animated_loading_overlay.dart';
 import '../../../shared/services/music_generation_service.dart';
+import '../../explore/views/explore_page.dart';
+import '../../library/views/library_page.dart';
 // import removed: GradientToggleSwitch no longer exists
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,6 +25,10 @@ class _HomePageState extends State<HomePage> {
   String? _successMessage;
   String? _errorMessage;
   final MusicGenerationService _musicService = MusicGenerationService();
+  
+  // PageView Controller and current page index
+  final PageController _pageController = PageController();
+  int _currentPageIndex = 0;
 
   final List<Map<String, dynamic>> musicStyles = [
     {"name": "Custom", "icon": Icons.edit, "color": Colors.greenAccent},
@@ -136,25 +143,65 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     lyricsController.dispose();
     styleController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping anywhere on screen
+        FocusScope.of(context).unfocus();
+      },
+      behavior: HitTestBehavior.opaque, // Ensure the gesture detector catches all taps
+      child: Scaffold(
         backgroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Remove default leading behavior
-        flexibleSpace: SafeArea(
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          elevation: 0,
+          automaticallyImplyLeading: false, // Remove default leading behavior
+          flexibleSpace: SafeArea(
           child: Stack(
             children: [
+              // Debug reset button (left side)
+              Positioned(
+                left: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('onboarding_completed', false);
+                      print('🔄 Onboarding reset! Restart app to see onboarding flow.');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Onboarding reset! Restart app.')),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'Reset',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               // Centered title based on full screen width
-              const Center(
+              Center(
                 child: Text(
-                  "Melo AI",
-                  style: TextStyle(
+                  _getPageTitle(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -211,80 +258,25 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Stack(
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          // Main content
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 32),
-
-                    // Gradient Pill Tabs (side by side)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TabPillButton(
-                            text: "Simple song",
-                            selected: selectedTab == "Simple song",
-                            onTap: () => setState(() => selectedTab = "Simple song"),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TabPillButton(
-                            text: "Custom song",
-                            selected: selectedTab == "Custom song",
-                            onTap: () => setState(() => selectedTab = "Custom song"),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12), // Reduced from 20 to 12 for tighter spacing
-
-                    // Different content based on tab
-                    if (selectedTab == "Custom song")
-                      _buildCustomSongUI()
-                    else
-                      _buildSimpleSongUI(),
-
-                    const SizedBox(height: 20),
-
-                    // Modern Gradient Create Button
-                    Center(
-                      child: GradientCTAButton(
-                        text: _isGenerating ? "Generating..." : "Create",
-                        onTap: _isGenerating ? null : _generateMusic,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          // Loading overlay
-          AnimatedLoadingOverlay(
-            isVisible: _isGenerating || _successMessage != null || _errorMessage != null,
-            successMessage: _successMessage ?? _errorMessage,
-          ),
+          _buildCreatePage(),
+          const ExplorePage(),
+          const LibraryPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey,
-        currentIndex: 0,
+        currentIndex: _currentPageIndex,
         onTap: (index) {
-          if (index == 1) {
-            Navigator.pushNamed(context, '/explore');
-          } else if (index == 2) {
-            Navigator.pushNamed(context, '/library');
-          }
+          setState(() {
+            _currentPageIndex = index;
+          });
+          _pageController.jumpToPage(index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
@@ -292,11 +284,92 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
         ],
       ),
+      ), // Close GestureDetector
     );
   }
 
-  /// ✅ Simple Song Placeholder
-  /// ✅ Simple Song UI (like before)
+  /// Get page title based on current page index
+  String _getPageTitle() {
+    switch (_currentPageIndex) {
+      case 0:
+        return "Melo AI";
+      case 1:
+        return "Explore";
+      case 2:
+        return "Library";
+      default:
+        return "Melo AI";
+    }
+  }
+
+  /// Create Page with all the music generation UI
+  Widget _buildCreatePage() {
+    return Stack(
+      children: [
+        // Main content
+        SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 32),
+
+                  // Gradient Pill Tabs (side by side)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TabPillButton(
+                          text: "Simple song",
+                          selected: selectedTab == "Simple song",
+                          onTap: () => setState(() => selectedTab = "Simple song"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TabPillButton(
+                          text: "Custom song",
+                          selected: selectedTab == "Custom song",
+                          onTap: () => setState(() => selectedTab = "Custom song"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12), // Reduced from 20 to 12 for tighter spacing
+
+                  // Different content based on tab
+                  if (selectedTab == "Custom song")
+                    _buildCustomSongUI()
+                  else
+                    _buildSimpleSongUI(),
+
+                  const SizedBox(height: 20),
+
+                  // Modern Gradient Create Button
+                  Center(
+                    child: GradientCTAButton(
+                      text: _isGenerating ? "Generating..." : "Create",
+                      onTap: _isGenerating ? null : _generateMusic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        
+        // Loading overlay
+        AnimatedLoadingOverlay(
+          isVisible: _isGenerating || _successMessage != null || _errorMessage != null,
+          successMessage: _successMessage ?? _errorMessage,
+        ),
+      ],
+    );
+  }
+
+  /// ✅ Simple Song UI
   Widget _buildSimpleSongUI() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,23 +382,31 @@ class _HomePageState extends State<HomePage> {
               "Song Prompts",
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24, // Increased from 20 to 24 (+4 points)
-                fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
                 fontFamily: 'Manrope',
               ),
             ),
-            // Simple Dropdown - compact size, flat design
+            // Simple Dropdown
             Container(
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E), // Solid dark gray
-                borderRadius: BorderRadius.circular(10), // Slightly rounded
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: selectedModel,
-                  items: ["Melo 3.5", "Melo V4", "Melo V4.5"].map((String value) {
+                  items: [
+                    "Melo 3.5",        // Suno
+                    "Melo V4",         // Suno  
+                    "Melo V4.5",       // Suno
+                    "Melo V2.0",       // GoAPI (< 3.5)
+                    "Melo V5.0",       // GoAPI (> 4.5)
+                    "GoAPI DiffRhythm", // GoAPI (contains 'goapi')
+                    "Qubico Model",    // GoAPI (contains 'qubico')
+                  ].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(
@@ -349,12 +430,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   iconSize: 12,
                   dropdownColor: const Color(0xFF2C2C2E),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Manrope',
-                  ),
                 ),
               ),
             ),
@@ -362,7 +437,7 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 10),
 
-        // Prompt Text Field + Inspiration Button
+        // Prompt Text Field
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -375,43 +450,18 @@ class _HomePageState extends State<HomePage> {
               TextField(
                 controller: lyricsController,
                 maxLines: 4,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) {
+                  FocusScope.of(context).unfocus();
+                },
+                onTapOutside: (event) {
+                  FocusScope.of(context).unfocus();
+                },
                 style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  hintText:
-                      "A lyrical rock song about us walking through the woods, chasing freedom and dreams",
+                  hintText: "A lyrical rock song about us walking through the woods, chasing freedom and dreams",
                   hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade800,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                onPressed: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Opacity(
-                      opacity: 0.75,
-                      child: Image.asset(
-                        'assets/white_m.png',
-                        height: 18,
-                        width: 18,
-                        fit: BoxFit.contain,
-                        color: Colors.white.withOpacity(0.8),
-                        colorBlendMode: BlendMode.modulate,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      "Inspiration",
-                      style: TextStyle(color: Colors.white, fontFamily: 'Manrope'),
-                    ),
-                  ],
                 ),
               ),
             ],
@@ -471,30 +521,38 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Feed the AI Label + Simple Dropdown
+        // Feed the AI Label + Dropdown
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               "Feed the AI",
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24, // Increased from 20 to 24 (+4 points)
-                  fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
-                  fontFamily: 'Manrope'),
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Manrope'
+              ),
             ),
-            // Simple Dropdown - compact size, flat design
             Container(
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E), // Solid dark gray
-                borderRadius: BorderRadius.circular(10), // Slightly rounded
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: selectedCustomModel,
-                  items: ["Melo V3.5", "Melo V4.0", "Melo V4.5"].map((String value) {
+                  items: [
+                    "Melo V3.5",       // Suno
+                    "Melo V4.0",       // Suno
+                    "Melo V4.5",       // Suno
+                    "Melo V2.0",       // GoAPI
+                    "Melo V5.0",       // GoAPI
+                    "GoAPI DiffRhythm", // GoAPI
+                    "Qubico Model",    // GoAPI
+                  ].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(
@@ -518,12 +576,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   iconSize: 12,
                   dropdownColor: const Color(0xFF2C2C2E),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Manrope',
-                  ),
                 ),
               ),
             ),
@@ -531,48 +583,40 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 10),
 
-        // Text Area with integrated buttons
+        // Text Area
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.grey.shade900,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Text input field
-              TextField(
-                controller: lyricsController,
-                maxLines: 4,
-                style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Enter your own lyrics",
-                  hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Integrated buttons row - positioned at bottom-right
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _buildIntegratedButton("AI Lyrics"),
-                  const SizedBox(width: 8),
-                  _buildIntegratedButton("Random"),
-                ],
-              ),
-            ],
+          child: TextField(
+            controller: lyricsController,
+            maxLines: 4,
+            textInputAction: TextInputAction.next,
+            onSubmitted: (_) {
+              FocusScope.of(context).nextFocus();
+            },
+            onTapOutside: (event) {
+              FocusScope.of(context).unfocus();
+            },
+            style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: "Enter your own lyrics",
+              hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
+            ),
           ),
         ),
         const SizedBox(height: 20),
-        // Shape the Sound Text Box
+
+        // Style Input
         const Text(
           "Shape the Sound",
           style: TextStyle(
             color: Colors.white,
-            fontSize: 24, // Increased from 20 to 24 (+4 points)
-            fontWeight: FontWeight.w600, // Changed from bold to semi-bold for cleaner look
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
             fontFamily: 'Manrope',
           ),
         ),
@@ -586,6 +630,13 @@ class _HomePageState extends State<HomePage> {
           child: TextField(
             controller: styleController,
             maxLines: 3,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              FocusScope.of(context).unfocus();
+            },
+            onTapOutside: (event) {
+              FocusScope.of(context).unfocus();
+            },
             style: const TextStyle(color: Colors.white, fontFamily: 'Manrope'),
             decoration: const InputDecoration(
               border: InputBorder.none,
@@ -597,75 +648,6 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-  /// Integrated button that blends with the input bar
-  Widget _buildIntegratedButton(String label) {
-    return Container(
-      decoration: BoxDecoration(
-        // Same background as input with subtle contrast
-        color: Colors.grey.shade800.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(12), // Match input field radius
-        border: Border.all(
-          color: Colors.grey.shade700.withOpacity(0.5), // Subtle border
-          width: 1,
-        ),
-        // Subtle shadow to make it feel part of the input box
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Handle button tap
-            if (label == "AI Lyrics") {
-              // Add AI Lyrics functionality
-              print("AI Lyrics tapped");
-            } else if (label == "Random") {
-              // Add Random functionality
-              print("Random tapped");
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Small logo icon
-                Opacity(
-                  opacity: 0.75, // Reduced opacity for blending
-                  child: Image.asset(
-                    'assets/white_m.png',
-                    height: 18, // Small size (16-20px range)
-                    width: 18,
-                    fit: BoxFit.contain,
-                    color: Colors.white.withOpacity(0.8), // Slight tint for color scheme
-                    colorBlendMode: BlendMode.modulate,
-                  ),
-                ),
-                const SizedBox(width: 6), // Horizontal padding between logo and text
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14, // Match input text size
-                    fontWeight: FontWeight.w500, // Weight ~500 as requested
-                    fontFamily: 'Manrope', // Match input font
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Gradient pill tab button for tabs
@@ -673,8 +655,12 @@ class TabPillButton extends StatelessWidget {
   final String text;
   final bool selected;
   final VoidCallback onTap;
-  const TabPillButton(
-      {required this.text, required this.selected, required this.onTap, super.key});
+  const TabPillButton({
+    required this.text, 
+    required this.selected, 
+    required this.onTap, 
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {

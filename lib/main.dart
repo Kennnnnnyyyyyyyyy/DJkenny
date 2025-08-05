@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:music_app/features/home/views/home_page.dart';
-import 'package:music_app/features/splash_screen/views/splash_screen.dart';
-import 'package:music_app/features/onboarding/views/onboarding_screen.dart';
-import 'package:music_app/features/qonversion/views/qonversion_screen.dart';
-import 'package:music_app/features/explore/views/explore_page.dart';
-import 'package:music_app/features/library/views/library_page.dart';
 import 'config/supabase_config.dart';
 import 'shared/services/realtime.dart';
 import 'shared/services/bootstrap.dart';
 import 'shared/services/auth_service.dart';
+import 'features/onboarding/views/onboarding_screen.dart'; // Import SplashIntro
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Force portrait mode only for better music app experience
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Configure status bar for consistent appearance
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ),
+  );
 
   try {
     // Get Supabase credentials from config
@@ -60,7 +71,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Music App',
+      title: 'MELO AI',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
@@ -69,27 +80,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Manrope', // Set Manrope as the default font for the entire app
         useMaterial3: true,
       ),
-      home: _buildInitialScreen(),
-      routes: {
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/splash': (context) => const SplashScreen(),
-        '/home': (context) => const HomePage(),
-        '/qonversion': (context) => const QonversionScreen(),
-        '/explore': (context) => const ExplorePage(),
-        '/library': (context) => const LibraryPage(),
-      },
+      home: const SplashIntro(), // Start directly with SplashIntro
     );
-  }
-
-  Widget _buildInitialScreen() {
-    // Check if Supabase is initialized
-    try {
-      Supabase.instance.client;
-      return const OnboardingScreen(); // Normal flow
-    } catch (e) {
-      // Supabase not initialized, show test screen
-      return const _TestScreen();
-    }
   }
 }
 
