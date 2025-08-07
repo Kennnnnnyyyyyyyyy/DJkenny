@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'dart:math';
 import 'onboarding_page_2.dart';
@@ -29,31 +30,7 @@ class _OnboardingPage1State extends State<OnboardingPage1>
     // Auto-navigate to OnboardingPage2 after 3 seconds
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => OnboardingPage2(
-              previews: [
-                SongPreview(
-                  title: 'Moonlit Dreams',
-                  coverImageUrl: 'https://picsum.photos/300/300?random=1',
-                  audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-                ),
-                SongPreview(
-                  title: 'Electronic Vibes',
-                  coverImageUrl: 'https://picsum.photos/300/300?random=2',
-                  audioUrl: 'https://apiboxfiles.erweima.ai/NGExZGJmMGEtNDFhMC00MGI1LTg3YzEtYmYwNWQ0NTY2YTlj.mp3',
-                ),
-                SongPreview(
-                  title: 'Peaceful Journey',
-                  coverImageUrl: 'https://picsum.photos/300/300?random=3',
-                  audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-                ),
-              ],
-              onTryNow: () {},
-            ),
-          ),
-        );
+        context.go('/onboarding2');
       }
     });
   }

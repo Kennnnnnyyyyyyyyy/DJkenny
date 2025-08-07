@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 class QonversionScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _QonversionScreenState extends State<QonversionScreen> {
               child: IconButton(
                 icon: Icon(Icons.close, color: Colors.white, size: 32),
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                  context.go('/');
                 },
                 tooltip: 'Close',
               ),

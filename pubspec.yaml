@@ -49,7 +49,6 @@ dependencies:
   audio_visualizer: ^1.1.0
   superwallkit_flutter: ^2.4.0
   flutter_native_splash: ^2.4.6
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

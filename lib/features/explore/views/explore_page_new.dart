@@ -79,11 +79,9 @@ class _ExplorePageState extends State<ExplorePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, 0.6, 1.0],
             colors: [
-              Color(0xFF0E1018), // Nightfall start - very top
-              Color(0xFF20233B), // Mid-point around 60% down
-              Color(0xFF4A2D7C), // Neon end - bottom edge
+              Color(0xFF101933), // Dark blue
+              Color(0xFF063F3F), // Dark teal
             ],
           ),
         ),
@@ -192,6 +190,7 @@ class _SearchBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: TextField(
         controller: controller,
@@ -541,6 +540,7 @@ class _ContestCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.pink.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.pink.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,6 +654,7 @@ class _CircleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

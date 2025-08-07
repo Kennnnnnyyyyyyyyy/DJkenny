@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import '../data/onboarding_data.dart';
 import '../../../features/onboarding/views/onboarding_page_3.dart';
 
 class SongPreview {
@@ -15,26 +18,25 @@ class SongPreview {
   });
 }
 
-class OnboardingPage2 extends StatefulWidget {
-  final List<SongPreview> previews;
-  final VoidCallback onTryNow;
+class OnboardingPage2 extends ConsumerStatefulWidget {
+  final VoidCallback? onTryNow; // Made optional since we navigate directly
 
   const OnboardingPage2({
     super.key,
-    required this.previews,
-    required this.onTryNow,
+    this.onTryNow,
   });
 
   @override
-  State<OnboardingPage2> createState() => _OnboardingPage2State();
+  ConsumerState<OnboardingPage2> createState() => _OnboardingPage2State();
 }
 
-class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingObserver {
+class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsBindingObserver {
   late PageController _pageController;
   late AudioPlayer _audioPlayer;
   int _currentIndex = 0;
   bool _isPlaying = false;
   bool _isAppActive = true;
+  List<SongPreview> _previews = []; // Now loaded from Supabase
 
   @override
   void initState() {
@@ -54,11 +56,40 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
       }
     });
 
-    // Auto-play first song
-    if (widget.previews.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadAndPlaySong(0);
-      });
+    // Load tracks from Supabase and auto-play first song
+    _loadTracksFromSupabase();
+  }
+
+  Future<void> _loadTracksFromSupabase() async {
+    try {
+      final tracks = await ref.read(page2TracksProvider.future);
+      
+      // Convert Supabase tracks to SongPreview format
+      _previews = tracks.map((track) => SongPreview(
+        title: track.title,
+        audioUrl: track.url.toString(),
+        // Generate placeholder cover images (you can replace with actual cover URLs from your table)
+        coverImageUrl: "https://picsum.photos/300/300?random=${track.index}",
+      )).toList();
+      
+      if (mounted) {
+        setState(() {
+          // Triggers rebuild with new data
+        });
+        
+        // Auto-play first song if available
+        if (_previews.isNotEmpty) {
+          _loadAndPlaySong(0);
+        }
+      }
+    } catch (e) {
+      print('❌ Error loading tracks from Supabase: $e');
+      // Fallback to empty list
+      if (mounted) {
+        setState(() {
+          _previews = [];
+        });
+      }
     }
   }
 
@@ -81,12 +112,12 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
   }
 
   Future<void> _loadAndPlaySong(int index) async {
-    if (index >= widget.previews.length) return;
+    if (index >= _previews.length) return;
     
     try {
       // Don't show loading state for better UX during track switches
       await _audioPlayer.stop();
-      await _audioPlayer.setUrl(widget.previews[index].audioUrl);
+      await _audioPlayer.setUrl(_previews[index].audioUrl);
       await _audioPlayer.play();
       
       // Update playing state after successful load
@@ -131,7 +162,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
   }
 
   void _nextSong() {
-    if (_currentIndex < widget.previews.length - 1) {
+    if (_currentIndex < _previews.length - 1) {
       final newIndex = _currentIndex + 1;
       _pageController.animateToPage(
         newIndex,
@@ -258,11 +289,11 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                   child: Column(
                     children: [
                         // Current Song Title (above carousel)
-                        if (widget.previews.isNotEmpty)
+                        if (_previews.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
-                              widget.previews[_currentIndex].title,
+                              _previews[_currentIndex].title,
                               style: TextStyle(
                                 fontFamily: 'Manrope',
                                 fontSize: 16,
@@ -286,13 +317,32 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                       
                       // Carousel
                       Expanded(
-                        child: PageView.builder(
+                        child: _previews.isEmpty 
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: Colors.white.withOpacity(0.7),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Loading tracks...',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontFamily: 'Manrope',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : PageView.builder(
                           controller: _pageController,
                           onPageChanged: (index) {
                             setState(() => _currentIndex = index);
                             _loadAndPlaySong(index);
                           },
-                          itemCount: widget.previews.length,
+                          itemCount: _previews.length,
                           itemBuilder: (context, index) {
                             final isCenter = index == _currentIndex;
                             
@@ -300,7 +350,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                               duration: const Duration(milliseconds: 500),
                               transform: Matrix4.identity()
                                 ..scale(isCenter ? 1.0 : 0.85),
-                              child: _buildSongCard(widget.previews[index], isCenter),
+                              child: _buildSongCard(_previews[index], isCenter),
                             );
                           },
                         ),
@@ -360,16 +410,18 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                           ),
                         ),
 
-                        const SizedBox(width: 32),                      // Next Button
+                        const SizedBox(width: 32),                      
+                        
+                        // Next Button
                       IconButton(
-                        onPressed: _currentIndex < widget.previews.length - 1 
+                        onPressed: _currentIndex < _previews.length - 1 
                             ? _nextSong 
                             : null,
                         splashRadius: 32,
                         padding: const EdgeInsets.all(16),
                         icon: Icon(
                           Icons.skip_next,
-                          color: _currentIndex < widget.previews.length - 1 
+                          color: _currentIndex < _previews.length - 1 
                               ? Colors.white 
                               : Colors.white.withOpacity(0.3),
                           size: 30,
@@ -390,8 +442,8 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [
-                          Color(0xFFFF6FD8), // Primary accent
-                          Color(0xFF3813C2), // Secondary accent
+                          Color(0xFFFF4AE2), // Pink to match your image
+                          Color(0xFF7A4BFF), // Purple to match your image  
                         ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
@@ -403,18 +455,8 @@ class _OnboardingPage2State extends State<OnboardingPage2> with WidgetsBindingOb
                       child: InkWell(
                         borderRadius: BorderRadius.circular(32),
                         onTap: () {
-                          // Navigate to onboarding page 3
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => OnboardingPage3(
-                                onDone: () {
-                                  // Handle completion - could navigate to main app
-                                  Navigator.of(context).popUntil((route) => route.isFirst);
-                                },
-                              ),
-                            ),
-                          );
+                          // Navigate to onboarding page 3 using GoRouter
+                          context.go('/onboarding3');
                         },
                         child: Container(
                           alignment: Alignment.center,

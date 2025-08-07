@@ -1,79 +1,74 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:music_app/features/home/views/home_page.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_1.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_2.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_3.dart';
-import 'package:music_app/features/onboarding/views/onboarding_page_4.dart';
-import 'package:music_app/shared/widgets/splash_controller.dart';
+import 'package:music_app/features/onboarding/views/onboarding_screen.dart';
 import 'package:music_app/router/router_constants.dart';
+
+// Quick slide transition
+Page<void> _buildPageWithTransition(Widget child, GoRouterState state) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 200), // Quick transition
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Right to left slide
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1.0, 0.0), // Start from right
+          end: Offset.zero, // End at center
+        ).animate(CurvedAnimation(
+          parent: animation,
+          curve: Curves.fastOutSlowIn,
+        )),
+        child: child,
+      );
+    },
+  );
+}
 
 final GoRouter _router = GoRouter(
   initialLocation: '/splash',
   routes: [
-    // ✅ Splash Screen
+        // ✅ Splash Screen (DJ image + MELO AI logo)
     GoRoute(
       path: '/splash',
-      name: 'splash',
-      builder: (context, state) => const Scaffold(body: SplashController()),
+      name: RouterConstants.splash,
+      pageBuilder: (context, state) => _buildPageWithTransition(const SplashIntro(), state),
     ),
     
     // ✅ Home Page
     GoRoute(
       path: '/',
       name: RouterConstants.home,
-      builder: (context, state) => const HomePage(),
+      pageBuilder: (context, state) => _buildPageWithTransition(const HomePage(), state),
     ),
     
     // ✅ Onboarding Page 1 (DJ silhouette)
     GoRoute(
       path: '/onboarding1',
       name: RouterConstants.onboarding1,
-      builder: (context, state) => const OnboardingPage1(),
+      pageBuilder: (context, state) => _buildPageWithTransition(const OnboardingPage1(), state),
     ),
     
-    // ✅ Onboarding Page 2 (Song preview carousel)
+    // ✅ Onboarding Page 2 (Song preview carousel) - Now fetches from Supabase
     GoRoute(
       path: '/onboarding2',
       name: RouterConstants.onboarding2,
-      builder: (context, state) => OnboardingPage2(
-        previews: [
-          SongPreview(
-            title: 'Moonlit Dreams',
-            coverImageUrl: 'https://picsum.photos/300/300?random=1',
-            audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-          ),
-          SongPreview(
-            title: 'Electronic Vibes',
-            coverImageUrl: 'https://picsum.photos/300/300?random=2',
-            audioUrl: 'https://apiboxfiles.erweima.ai/NGExZGJmMGEtNDFhMC00MGI1LTg3YzEtYmYwNWQ0NTY2YTlj.mp3',
-          ),
-          SongPreview(
-            title: 'Peaceful Journey',
-            coverImageUrl: 'https://picsum.photos/300/300?random=3',
-            audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-          ),
-        ],
-        onTryNow: () {}, // This is now handled by the button itself
-      ),
+      pageBuilder: (context, state) => _buildPageWithTransition(const OnboardingPage2(), state),
     ),
     // ✅ Onboarding Page 3 (AI-Powered Creativity)
     GoRoute(
       path: '/onboarding3',
       name: 'onboarding3',
-      builder: (context, state) => OnboardingPage3(
+      pageBuilder: (context, state) => _buildPageWithTransition(OnboardingPage3(
         onDone: () {
-          // Navigate to onboarding page 4
-          context.go('/onboarding4');
+          // Navigate directly to home page
+          context.go('/');
         },
-      ),
-    ),
-    // ✅ Onboarding Page 4 (Ready to Create)
-    GoRoute(
-      path: '/onboarding4',
-      name: 'onboarding4',
-      builder: (context, state) => const OnboardingPage4(),
+      ), state),
     ),
 
   ],

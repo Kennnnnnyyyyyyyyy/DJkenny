@@ -125,14 +125,23 @@ class OnboardingPage4 extends StatelessWidget {
                     const SizedBox(height: 30),
                     
                     // Get Started button
-                    SizedBox(
+                    Container(
                       width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Pink to purple gradient
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
                       child: ElevatedButton(
                         onPressed: () => _completeOnboarding(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF3813C2),
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 18),
+                          shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         ),
                         child: const Text(

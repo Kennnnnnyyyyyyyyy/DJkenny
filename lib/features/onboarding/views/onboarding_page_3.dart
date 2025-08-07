@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 
 enum MessageType {
@@ -45,10 +46,17 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   late AnimationController _discController;
   late AnimationController _messageAnimationController;
   late AnimationController _particleController;
+  late AnimationController _waveController;
+  late AnimationController _colorController;
+  late AnimationController _driftController;
   
   String _currentStep = "intro";
   String? _selectedMood, _selectedGenre, _selectedSubject;
   String? _currentSongUrl;
+  bool _isSecondPaymentPrompt = false;
+  bool _modalShown = false;
+  bool _showPsychedelicBackground = false;
+  bool _isProcessingChoice = false; // Flag to prevent multiple rapid clicks
   
   // 36-track matrix for all mood-genre-subject combinations
   final Map<String, String> _songMatrix = {
@@ -111,6 +119,22 @@ class _OnboardingPage3State extends State<OnboardingPage3>
       duration: const Duration(seconds: 6),
     );
 
+    // Psychedelic wave controllers
+    _waveController = AnimationController(
+      duration: const Duration(milliseconds: 1600),
+      vsync: this,
+    );
+    
+    _colorController = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
+    );
+    
+    _driftController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    );
+
     _player.playingStream.listen((isPlaying) {
       if (mounted && !MediaQuery.of(context).disableAnimations) {
         if (isPlaying) {
@@ -134,6 +158,9 @@ class _OnboardingPage3State extends State<OnboardingPage3>
     _discController.dispose();
     _messageAnimationController.dispose();
     _particleController.dispose();
+    _waveController.dispose();
+    _colorController.dispose();
+    _driftController.dispose();
     super.dispose();
   }
 
@@ -185,6 +212,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         Future.delayed(const Duration(milliseconds: 1500), () {
           print('🔥 Adding choice buttons');
           _currentStep = "start";
+          // Ensure processing flag is reset for initial state
+          _isProcessingChoice = false;
           _addMessage(ChatMessage(
             text: "",
             isFromUser: false,
@@ -230,6 +259,17 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             ),
           ),
 
+          // Psychedelic Wave Visualizer (appears after song is created)
+          if (_showPsychedelicBackground)
+            Positioned.fill(
+              child: _PsychedelicWaveVisualizer(
+                audioPlayer: _player,
+                waveController: _waveController,
+                colorController: _colorController,
+                driftController: _driftController,
+              ),
+            ),
+
           // Dark scrim for better text readability
           Positioned.fill(
             child: Container(
@@ -244,14 +284,16 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 // Header with MELO AI branding
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: const Text(
-                    'MELO AI',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'SF Pro Display',
-                      letterSpacing: 3,
+                  child: const Center(
+                    child: Text(
+                      'MELO AI',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w300,
+                        fontFamily: 'SF Pro Display',
+                        letterSpacing: 3,
+                      ),
                     ),
                   ),
                 ),
@@ -301,17 +343,25 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             Container(
               width: double.infinity,
               margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Pink to purple gradient
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(25),
+              ),
               child: ElevatedButton(
                 onPressed: () => _handlePaymentChoice("Sounds great!"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6FD8),
+                  backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 18),
+                  shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  elevation: 4,
-                  shadowColor: const Color(0xFFFF6FD8).withOpacity(0.3),
+                  elevation: 0,
                 ),
                 child: const Text(
                   "Sounds great!",
@@ -323,29 +373,33 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 ),
               ),
             ),
-            Container(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _handlePaymentChoice("Explain some more"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0x33FFFFFF),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+            // Only show "Explain some more" button if it's NOT the second payment prompt
+            if (!_isSecondPaymentPrompt)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 12),
+                child: ElevatedButton(
+                  onPressed: () => _handlePaymentChoice("Explain some more"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.2), // Transparent white background
+                    foregroundColor: Colors.white, // White text color
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Explain some more",
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'SF Pro Display',
+                  child: const Text(
+                    "Explain some more",
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'SF Pro Display',
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       );
@@ -357,17 +411,25 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             return Container(
               width: double.infinity,
               margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Always keep pink to purple gradient
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(25),
+              ),
               child: ElevatedButton(
-                onPressed: () => _handleChoice(choice),
+                onPressed: _isProcessingChoice ? null : () => _handleChoice(choice),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6FD8), // Updated to match your theme
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white, // Always keep white text
                   padding: const EdgeInsets.symmetric(vertical: 18),
+                  shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  elevation: 4,
-                  shadowColor: const Color(0xFFFF6FD8).withOpacity(0.3),
+                  elevation: 0,
                 ),
                 child: Text(
                   choice,
@@ -375,6 +437,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'SF Pro Display',
+                    color: Colors.white, // Always keep white text
                   ),
                 ),
               ),
@@ -593,17 +656,25 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 bool isPlaying = snapshot.data ?? false;
                 return Container(
                   width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Pink to purple gradient
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                   child: ElevatedButton.icon(
                     onPressed: () => _togglePlayPause(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6FD8), // Updated to match your theme
+                      backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
-                      elevation: 4,
-                      shadowColor: const Color(0xFFFF6FD8).withOpacity(0.3),
+                      elevation: 0,
                     ),
                     icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
                     label: Text(
@@ -625,6 +696,15 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   }
 
   void _handleChoice(String choice) {
+    // Prevent multiple rapid clicks
+    if (_isProcessingChoice) {
+      print('🚫 Choice already processing, ignoring rapid tap');
+      return;
+    }
+    
+    // Set processing flag
+    _isProcessingChoice = true;
+    
     _addMessage(ChatMessage(
       text: choice,
       isFromUser: true,
@@ -656,6 +736,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               type: MessageType.choices,
               choices: ["Motivational", "Chill", "Happy"], // Exact 3 options
             ));
+            // Reset processing flag after choices are shown
+            _isProcessingChoice = false;
           });
           
         } else if (_currentStep == "mood") {
@@ -676,6 +758,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               type: MessageType.choices,
               choices: ["K-Pop", "Rap", "Rock", "Pop"], // Exact 4 options
             ));
+            // Reset processing flag after choices are shown
+            _isProcessingChoice = false;
           });
           
         } else if (_currentStep == "genre") {
@@ -696,6 +780,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               type: MessageType.choices,
               choices: ["My pet", "My future self", "My love"], // Exact 3 options
             ));
+            // Reset processing flag after choices are shown
+            _isProcessingChoice = false;
           });
           
         } else if (_currentStep == "subject") {
@@ -716,6 +802,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
           
           Future.delayed(const Duration(milliseconds: 2000), () {
             _currentStep = "creating";
+            // Reset processing flag as we're moving to song creation
+            _isProcessingChoice = false;
             _createSong();
           });
         }
@@ -754,6 +842,16 @@ class _OnboardingPage3State extends State<OnboardingPage3>
           
           _currentStep = "created";
           _discController.repeat();
+          
+          // Enable psychedelic background
+          setState(() {
+            _showPsychedelicBackground = true;
+          });
+          
+          // Start psychedelic wave animations
+          _waveController.repeat();
+          _colorController.repeat();
+          _driftController.repeat();
           
           _addMessage(ChatMessage(
             text: "Your song is ready! 🎵",
@@ -938,19 +1036,19 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   }
 
   void _handlePaymentChoice(String choice) {
-    // Add user's choice message
-    _addMessage(ChatMessage(
-      text: choice,
-      isFromUser: true,
-      type: MessageType.text,
-    ));
-    
-    if (choice == "Sounds great!") {
-      // Navigate to payment/subscription screen
-      Future.delayed(const Duration(milliseconds: 800), () {
-        _showSubscriptionModal();
-      });
-    } else {
+    if (choice == "Sounds great!" && !_modalShown) {
+      // Set flag to prevent multiple modal opens
+      _modalShown = true;
+      // Navigate directly to subscription modal without adding duplicate message
+      _showSubscriptionModal();
+    } else if (choice == "Explain some more") {
+      // Add user's choice message only for "Explain some more"
+      _addMessage(ChatMessage(
+        text: choice,
+        isFromUser: true,
+        type: MessageType.text,
+      ));
+      
       // Show more details about the premium features
       Future.delayed(const Duration(milliseconds: 800), () {
         setState(() {
@@ -979,6 +1077,9 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               ));
               
               Future.delayed(const Duration(milliseconds: 800), () {
+                setState(() {
+                  _isSecondPaymentPrompt = true;
+                });
                 _addMessage(ChatMessage(
                   text: "",
                   isFromUser: false,
@@ -993,17 +1094,23 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   }
 
   void _showSubscriptionModal() {
+    final parentContext = context; // Store parent context
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _buildSubscriptionModal(),
-    );
+      builder: (modalContext) => _buildSubscriptionModal(modalContext, parentContext), // Pass both contexts
+    ).whenComplete(() {
+      // Reset flag when modal is closed so it can be opened again
+      setState(() {
+        _modalShown = false;
+      });
+    });
   }
 
-  Widget _buildSubscriptionModal() {
+  Widget _buildSubscriptionModal(BuildContext modalContext, BuildContext parentContext) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: MediaQuery.of(modalContext).size.height * 0.8,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -1023,16 +1130,45 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
+            // Header with handle bar and close button
+            Stack(
+              children: [
+                // Handle bar (centered)
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
+                // Close button (top right)
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(modalContext);
+                      // Use parent context for GoRouter navigation
+                      parentContext.go('/');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             
             const SizedBox(height: 24),
@@ -1092,9 +1228,9 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               margin: const EdgeInsets.only(bottom: 16),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  // Navigate to OnboardingPage4 after subscription
-                  widget.onDone();
+                  Navigator.pop(modalContext);
+                  // Use parent context for GoRouter navigation
+                  parentContext.go('/');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -1119,8 +1255,9 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             Center(
               child: TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  widget.onDone();
+                  Navigator.pop(modalContext);
+                  // Use parent context for GoRouter navigation
+                  parentContext.go('/');
                 },
                 child: const Text(
                   "Continue with Free Version",
@@ -1297,4 +1434,146 @@ class _ChatParticlePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// Psychedelic MultiWave Visualizer Widget
+class _PsychedelicWaveVisualizer extends StatefulWidget {
+  final AudioPlayer audioPlayer;
+  final AnimationController waveController;
+  final AnimationController colorController;
+  final AnimationController driftController;
+
+  const _PsychedelicWaveVisualizer({
+    required this.audioPlayer,
+    required this.waveController,
+    required this.colorController,
+    required this.driftController,
+  });
+
+  @override
+  _PsychedelicWaveVisualizerState createState() => _PsychedelicWaveVisualizerState();
+}
+
+class _PsychedelicWaveVisualizerState extends State<_PsychedelicWaveVisualizer> {
+  @override
+  Widget build(BuildContext context) {
+    final isAccessibilityReduceMotion = MediaQuery.of(context).disableAnimations;
+    final shouldShowWaves = !isAccessibilityReduceMotion;
+
+    if (!shouldShowWaves) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFFF6FD8).withOpacity(0.2),
+              Color(0xFF3813C2).withOpacity(0.2),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: Listenable.merge([widget.waveController, widget.colorController, widget.driftController]),
+      builder: (context, child) {
+        return CustomPaint(
+          size: Size.infinite,
+          painter: _PsychedelicWavePainter(
+            waveProgress: widget.waveController.value,
+            colorProgress: widget.colorController.value,
+            driftProgress: widget.driftController.value,
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Custom Painter for Psychedelic Wave Effect
+class _PsychedelicWavePainter extends CustomPainter {
+  final double waveProgress;
+  final double colorProgress;
+  final double driftProgress;
+
+  _PsychedelicWavePainter({
+    required this.waveProgress,
+    required this.colorProgress,
+    required this.driftProgress,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+
+    const waveCount = 3;
+    const amplitude = 0.8;
+    const frequency = 1.6;
+    const lowFrequency = 0.2;
+
+    for (int waveIndex = 0; waveIndex < waveCount; waveIndex++) {
+      final path = Path();
+      final waveOffset = (waveIndex * 2 * pi / waveCount) + (waveProgress * 2 * pi);
+      final driftOffset = driftProgress * lowFrequency * 2 * pi;
+      
+      // Create wave path
+      for (double x = 0; x <= size.width; x += 2) {
+        final normalizedX = x / size.width;
+        
+        // Multiple sine waves for complexity
+        final wave1 = sin((normalizedX * frequency * 2 * pi) + waveOffset) * amplitude;
+        final wave2 = sin((normalizedX * frequency * 4 * pi) + (waveOffset * 1.3)) * (amplitude * 0.5);
+        final wave3 = sin((normalizedX * frequency * 0.5 * pi) + driftOffset) * (amplitude * 0.3);
+        
+        final combinedWave = wave1 + wave2 + wave3;
+        final y = (size.height * 0.5) + (combinedWave * size.height * 0.2);
+        
+        if (x == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+      
+      // Create trippy gradient color based on position and time
+      final colorPhase = (colorProgress + (waveIndex * 0.33)) % 1.0;
+      final color1 = Color(0xFFFF6FD8); // Pink
+      final color2 = Color(0xFF3813C2); // Purple
+      
+      // Lerp between colors with trippy cycling
+      final lerpValue = (sin(colorPhase * 2 * pi) + 1) / 2;
+      final waveColor = Color.lerp(color1, color2, lerpValue)!;
+      
+      paint.color = waveColor.withOpacity(0.35);
+      
+      // Draw multiple offset versions for glow effect
+      for (int i = 0; i < 3; i++) {
+        final offsetPath = path.shift(Offset(0, i * 2 - 2));
+        paint.color = waveColor.withOpacity(0.35 - (i * 0.1));
+        canvas.drawPath(offsetPath, paint);
+      }
+    }
+    
+    // Add radial gradient overlay for extra psychedelic effect
+    final gradientPaint = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 1.0,
+        colors: [
+          Color(0xFFFF6FD8).withOpacity(0.1),
+          Color(0xFF3813C2).withOpacity(0.05),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.7, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), gradientPaint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

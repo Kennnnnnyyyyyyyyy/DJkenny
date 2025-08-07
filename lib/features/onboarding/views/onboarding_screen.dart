@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'package:music_app/features/onboarding/views/onboarding_page_1.dart';
 
@@ -16,12 +17,7 @@ class _SplashIntroState extends State<SplashIntro> {
     
     // Navigate to OnboardingPage1 after 3 seconds
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const OnboardingPage1(),
-        ),
-      );
+      context.go('/onboarding1');
     });
   }
 

@@ -215,7 +215,8 @@ class _LibraryPageState extends State<LibraryPage> {
               GradientCTAButton(
                 text: 'Start Creating',
                 onTap: () {
-                  Navigator.pushNamed(context, '/home');
+                  // This is already within HomePage, so navigation is handled by parent
+                  // Could potentially communicate with parent to switch to Create tab
                 },
               ),
             ],
@@ -360,9 +361,23 @@ class _LibraryPageState extends State<LibraryPage> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: _buildLibraryContent(),
+        backgroundColor: Colors.transparent,
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.0, 0.6, 1.0],
+              colors: [
+                Color(0xFF0E1018), // Nightfall start - very top
+                Color(0xFF20233B), // Mid-point around 60% down
+                Color(0xFF4A2D7C), // Neon end - bottom edge
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: _buildLibraryContent(),
+          ),
         ),
       ), // Close Scaffold
     ); // Close GestureDetector

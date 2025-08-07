@@ -156,57 +156,43 @@ class _HomePageState extends State<HomePage> {
       },
       behavior: HitTestBehavior.opaque, // Ensure the gesture detector catches all taps
       child: Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          automaticallyImplyLeading: false, // Remove default leading behavior
-          flexibleSpace: SafeArea(
-          child: Stack(
+        backgroundColor: Colors.transparent, // Make transparent for gradient background
+        extendBodyBehindAppBar: true, // Extend content behind system UI
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.0, 0.6, 1.0],
+              colors: [
+                Color(0xFF0E1018), // Nightfall start - very top
+                Color(0xFF20233B), // Mid-point around 60% down
+                Color(0xFF4A2D7C), // Neon end - bottom edge
+              ],
+            ),
+          ),
+          child: Column(
             children: [
-              // Debug reset button (left side)
-              Positioned(
-                left: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setBool('onboarding_completed', false);
-                      print('🔄 Onboarding reset! Restart app to see onboarding flow.');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Onboarding reset! Restart app.')),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Reset',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              // Status bar area with same gradient color
+              Container(
+                height: MediaQuery.of(context).padding.top,
+                color: const Color(0xFF0E1018), // Match gradient top color
               ),
+              // AppBar content
+              Container(
+                height: 56, // Standard AppBar height
+                child: Stack(
+                  children: [
               // Centered title based on full screen width
               Center(
                 child: Text(
                   _getPageTitle(),
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 1.5,
-                    fontFamily: 'Manrope',
+                    fontFamily: 'Playfair Display',
                   ),
                 ),
               ),
@@ -218,13 +204,14 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/qonversion');
+                      // Fixed: Use GoRouter instead of Navigator
+                      context.go('/');
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
+                          colors: [Color(0xFFFF6FD8), Color(0xFF3813C2)],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -255,35 +242,59 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ],
+                ),
+              ),
+              // Main content (PageView)
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildCreatePage(),
+                    const ExplorePage(),
+                    const LibraryPage(),
+                  ],
+                ),
+              ),
+              // Bottom Navigation
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0.0, 0.6, 1.0],
+                    colors: [
+                      Color(0xFF0E1018), // Nightfall start - very top
+                      Color(0xFF20233B), // Mid-point around 60% down
+                      Color(0xFF4A2D7C), // Neon end - bottom edge
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Container(
+                    height: 60,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildNavItem(Icons.music_note, "Create", 0),
+                        _buildNavItem(Icons.explore, "Explore", 1),
+                        _buildNavItem(Icons.library_music, "Library", 2),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          _buildCreatePage(),
-          const ExplorePage(),
-          const LibraryPage(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _currentPageIndex,
-        onTap: (index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-          _pageController.jumpToPage(index);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Create"),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
-        ],
-      ),
       ), // Close GestureDetector
     );
   }
@@ -302,6 +313,38 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Build navigation item
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _currentPageIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentPageIndex = index;
+        });
+        _pageController.jumpToPage(index);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? Colors.white : Colors.grey,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Create Page with all the music generation UI
   Widget _buildCreatePage() {
     return Stack(
@@ -315,7 +358,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 8), // Reduced from 32 to move content up
 
                   // Gradient Pill Tabs (side by side)
                   Row(

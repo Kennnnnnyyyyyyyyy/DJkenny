@@ -45,26 +45,7 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/onboarding2',
       name: RouterConstants.onboarding2,
-      builder: (context, state) => OnboardingPage2(
-        previews: [
-          SongPreview(
-            title: 'Moonlit Dreams',
-            coverImageUrl: 'https://picsum.photos/300/300?random=1',
-            audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-          ),
-          SongPreview(
-            title: 'Electronic Vibes',
-            coverImageUrl: 'https://picsum.photos/300/300?random=2',
-            audioUrl: 'https://apiboxfiles.erweima.ai/NGExZGJmMGEtNDFhMC00MGI1LTg3YzEtYmYwNWQ0NTY2YTlj.mp3',
-          ),
-          SongPreview(
-            title: 'Peaceful Journey',
-            coverImageUrl: 'https://picsum.photos/300/300?random=3',
-            audioUrl: 'https://apiboxfiles.erweima.ai/OTQ1NDNlMzgtZDE3YS00ZGFhLWExYmUtZTg1ZTI2MWVmM2Qz.mp3',
-          ),
-        ],
-        onTryNow: () {}, // This is now handled by the button itself
-      ),
+      builder: (context, state) => const OnboardingPage2(),
     ),
     // ✅ Onboarding Page 3 (AI-Powered Creativity)
     GoRoute(

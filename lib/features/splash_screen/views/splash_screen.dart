@@ -76,20 +76,6 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               child: const Text('Test Onboarding 1'),
             ),
-            const SizedBox(height: 10),
-            // Reset onboarding button
-            ElevatedButton(
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.remove('onboarding_completed');
-                print('🔄 Onboarding reset! Restart the app to see onboarding flow.');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Reset Onboarding'),
-            ),
           ],
         ),
       ),
