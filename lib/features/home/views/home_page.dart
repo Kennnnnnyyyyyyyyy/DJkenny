@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import '../widgets/gradient_cta_button.dart';
 import '../../../shared/widgets/animated_loading_overlay.dart';
 import '../../../shared/services/music_generation_service.dart';
@@ -139,6 +140,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _openPaywall() async {
+    try {
+      await Superwall.shared.registerPlacement('PremiumBeat');
+    } catch (e, st) {
+      debugPrint('Superwall paywall error: $e\n$st');
+    }
+  }
+
   @override
   void dispose() {
     lyricsController.dispose();
@@ -203,10 +212,7 @@ class _HomePageState extends State<HomePage> {
                 bottom: 0,
                 child: Center(
                   child: GestureDetector(
-                    onTap: () {
-                      // Fixed: Use GoRouter instead of Navigator
-                      context.go('/');
-                    },
+                    onTap: _openPaywall,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(

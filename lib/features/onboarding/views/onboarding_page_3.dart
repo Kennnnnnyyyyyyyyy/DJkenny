@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../../onboarding/onboarding_service.dart';
+import '../../../onboarding/choice_normalizers.dart';
 
 enum MessageType {
   text,
@@ -43,6 +45,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final AudioPlayer _player = AudioPlayer();
+  final OnboardingService _onboardingService = OnboardingService();
   late AnimationController _discController;
   late AnimationController _messageAnimationController;
   late AnimationController _particleController;
@@ -57,51 +60,6 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   bool _modalShown = false;
   bool _showPsychedelicBackground = false;
   bool _isProcessingChoice = false; // Flag to prevent multiple rapid clicks
-  
-  // 36-track matrix for all mood-genre-subject combinations
-  final Map<String, String> _songMatrix = {
-    // Motivational tracks
-    'motivational-k-pop-my_pet': 'https://cdn.melo.ai/tracks/motivational_kpop_my_pet.mp3',
-    'motivational-k-pop-my_future_self': 'https://cdn.melo.ai/tracks/motivational_kpop_my_future_self.mp3',
-    'motivational-k-pop-my_love': 'https://cdn.melo.ai/tracks/motivational_kpop_my_love.mp3',
-    'motivational-rap-my_pet': 'https://cdn.melo.ai/tracks/motivational_rap_my_pet.mp3',
-    'motivational-rap-my_future_self': 'https://cdn.melo.ai/tracks/motivational_rap_my_future_self.mp3',
-    'motivational-rap-my_love': 'https://cdn.melo.ai/tracks/motivational_rap_my_love.mp3',
-    'motivational-rock-my_pet': 'https://cdn.melo.ai/tracks/motivational_rock_my_pet.mp3',
-    'motivational-rock-my_future_self': 'https://cdn.melo.ai/tracks/motivational_rock_my_future_self.mp3',
-    'motivational-rock-my_love': 'https://cdn.melo.ai/tracks/motivational_rock_my_love.mp3',
-    'motivational-pop-my_pet': 'https://cdn.melo.ai/tracks/motivational_pop_my_pet.mp3',
-    'motivational-pop-my_future_self': 'https://cdn.melo.ai/tracks/motivational_pop_my_future_self.mp3',
-    'motivational-pop-my_love': 'https://cdn.melo.ai/tracks/motivational_pop_my_love.mp3',
-    
-    // Chill tracks
-    'chill-k-pop-my_pet': 'https://cdn.melo.ai/tracks/chill_kpop_my_pet.mp3',
-    'chill-k-pop-my_future_self': 'https://cdn.melo.ai/tracks/chill_kpop_my_future_self.mp3',
-    'chill-k-pop-my_love': 'https://cdn.melo.ai/tracks/chill_kpop_my_love.mp3',
-    'chill-rap-my_pet': 'https://cdn.melo.ai/tracks/chill_rap_my_pet.mp3',
-    'chill-rap-my_future_self': 'https://cdn.melo.ai/tracks/chill_rap_my_future_self.mp3',
-    'chill-rap-my_love': 'https://cdn.melo.ai/tracks/chill_rap_my_love.mp3',
-    'chill-rock-my_pet': 'https://cdn.melo.ai/tracks/chill_rock_my_pet.mp3',
-    'chill-rock-my_future_self': 'https://cdn.melo.ai/tracks/chill_rock_my_future_self.mp3',
-    'chill-rock-my_love': 'https://cdn.melo.ai/tracks/chill_rock_my_love.mp3',
-    'chill-pop-my_pet': 'https://cdn.melo.ai/tracks/chill_pop_my_pet.mp3',
-    'chill-pop-my_future_self': 'https://cdn.melo.ai/tracks/chill_pop_my_future_self.mp3',
-    'chill-pop-my_love': 'https://cdn.melo.ai/tracks/chill_pop_my_love.mp3',
-    
-    // Happy tracks
-    'happy-k-pop-my_pet': 'https://cdn.melo.ai/tracks/happy_kpop_my_pet.mp3',
-    'happy-k-pop-my_future_self': 'https://cdn.melo.ai/tracks/happy_kpop_my_future_self.mp3',
-    'happy-k-pop-my_love': 'https://cdn.melo.ai/tracks/happy_kpop_my_love.mp3',
-    'happy-rap-my_pet': 'https://cdn.melo.ai/tracks/happy_rap_my_pet.mp3',
-    'happy-rap-my_future_self': 'https://cdn.melo.ai/tracks/happy_rap_my_future_self.mp3',
-    'happy-rap-my_love': 'https://cdn.melo.ai/tracks/happy_rap_my_love.mp3',
-    'happy-rock-my_pet': 'https://cdn.melo.ai/tracks/happy_rock_my_pet.mp3',
-    'happy-rock-my_future_self': 'https://cdn.melo.ai/tracks/happy_rock_my_future_self.mp3',
-    'happy-rock-my_love': 'https://cdn.melo.ai/tracks/happy_rock_my_love.mp3',
-    'happy-pop-my_pet': 'https://cdn.melo.ai/tracks/happy_pop_my_pet.mp3',
-    'happy-pop-my_future_self': 'https://cdn.melo.ai/tracks/happy_pop_my_future_self.mp3',
-    'happy-pop-my_love': 'https://cdn.melo.ai/tracks/happy_pop_my_love.mp3',
-  };
 
   @override
   void initState() {
@@ -155,6 +113,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   void dispose() {
     _scrollController.dispose();
     _player.dispose();
+    _onboardingService.dispose();
     _discController.dispose();
     _messageAnimationController.dispose();
     _particleController.dispose();
@@ -630,7 +589,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             ),
             const SizedBox(height: 20),
             const Text(
-              "Time Capsule",
+              "Born from Your Choices",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -811,16 +770,20 @@ class _OnboardingPage3State extends State<OnboardingPage3>
     });
   }
 
-  void _createSong() {
-    // Get the song URL based on selections
-    String key = '${_selectedMood}-${_selectedGenre}-${_selectedSubject}';
-    print('🎵 Creating song with key: $key');
-    print('🎵 Available keys: ${_songMatrix.keys.toList()}');
-    String? songUrl = _songMatrix[key];
+  void _createSong() async {
+    // Use Supabase to fetch the song based on user selections
+    print('🎵 Creating song for: mood=$_selectedMood, genre=$_selectedGenre, subject=$_selectedSubject');
     
-    if (songUrl != null) {
-      print('🎵 Found song URL: $songUrl');
-      _currentSongUrl = songUrl;
+    try {
+      // Map UI choices to database format
+      String moodUI = _selectedMood!.toLowerCase();
+      String genreUI = _selectedGenre!;
+      String topicUI = _selectedSubject!;
+      
+      // Convert topic back to UI format for the service
+      if (topicUI == 'my_pet') topicUI = 'My pet';
+      else if (topicUI == 'my_future_self') topicUI = 'My future self'; 
+      else if (topicUI == 'my_love') topicUI = 'My love';
       
       // Clear messages and show creating UI
       setState(() {
@@ -833,51 +796,75 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         type: MessageType.creating,
       ));
       
-      // Simulate creation time
-      Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _messages.clear();
-          });
-          
-          _currentStep = "created";
-          _discController.repeat();
-          
-          // Enable psychedelic background
-          setState(() {
-            _showPsychedelicBackground = true;
-          });
-          
-          // Start psychedelic wave animations
-          _waveController.repeat();
-          _colorController.repeat();
-          _driftController.repeat();
-          
-          _addMessage(ChatMessage(
-            text: "Your song is ready! 🎵",
-            isFromUser: false,
-            type: MessageType.text,
-          ));
-          
-          Future.delayed(const Duration(milliseconds: 1000), () {
+      // Fetch and play the track from Supabase
+      final track = await _onboardingService.playFromChoices(
+        moodUI: moodUI,
+        genreUI: genreUI,
+        topicUI: topicUI,
+      );
+      
+      if (track != null) {
+        print('🎵 Found track: ${track.title} - ${track.publicUrl}');
+        _currentSongUrl = track.publicUrl;
+        
+        // Simulate creation time
+        Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() {
+              _messages.clear();
+            });
+            
+            _currentStep = "created";
+            _discController.repeat();
+            
+            // Enable psychedelic background
+            setState(() {
+              _showPsychedelicBackground = true;
+            });
+            
+            // Start psychedelic wave animations
+            _waveController.repeat();
+            _colorController.repeat();
+            _driftController.repeat();
+            
             _addMessage(ChatMessage(
-              text: "",
+              text: "Your song is ready! 🎵",
               isFromUser: false,
-              type: MessageType.songCreated,
+              type: MessageType.text,
             ));
             
-            // After song is created and playing for a few seconds, show upgrade flow
-            Timer(const Duration(seconds: 5), () {
-              if (mounted) {
-                _showUpgradeFlow();
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              _addMessage(ChatMessage(
+                text: "",
+                isFromUser: false,
+                type: MessageType.songCreated,
+              ));
+              
+              // Automatically start playing the song
+              if (_currentSongUrl != null) {
+                _player.setUrl(_currentSongUrl!).then((_) {
+                  _player.play();
+                }).catchError((e) {
+                  print('Error auto-playing song: $e');
+                });
               }
+              
+              // After song is created and playing for a few seconds, show upgrade flow
+              Timer(const Duration(seconds: 5), () {
+                if (mounted) {
+                  _showUpgradeFlow();
+                }
+              });
             });
-          });
-        }
+          }
+        });
+      }
+    } catch (e) {
+      print('🚨 Error creating song: $e');
+      // Show error message
+      setState(() {
+        _messages.clear();
       });
-    } else {
-      print('🚨 Song not found for key: $key');
-      // Fallback: show error or default song
       _addMessage(ChatMessage(
         text: "Sorry, couldn't create your song. Please try again!",
         isFromUser: false,
