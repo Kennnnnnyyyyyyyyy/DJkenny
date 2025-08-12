@@ -8,6 +8,7 @@ class OnboardingTrack {
   final String mood;
   final String genre;
   final String topic;
+  final String? coverUrl; // New: album art URL
 
   const OnboardingTrack({
     required this.id,
@@ -18,6 +19,7 @@ class OnboardingTrack {
     required this.mood,
     required this.genre,
     required this.topic,
+    this.coverUrl,
   });
 
   /// Creates an OnboardingTrack from a Supabase row map
@@ -31,12 +33,13 @@ class OnboardingTrack {
       mood: map['mood'] as String,
       genre: map['genre'] as String,
       topic: map['topic'] as String,
+      coverUrl: map['cover_url'] as String?,
     );
   }
 
   @override
   String toString() {
     return 'OnboardingTrack(id: $id, pageTag: $pageTag, listIndex: $listIndex, '
-        'title: $title, publicUrl: $publicUrl, mood: $mood, genre: $genre, topic: $topic)';
+        'title: $title, publicUrl: $publicUrl, mood: $mood, genre: $genre, topic: $topic, coverUrl: $coverUrl)';
   }
 }

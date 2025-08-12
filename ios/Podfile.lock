@@ -28,6 +28,9 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - sqflite_darwin (0.0.4):
+    - Flutter
+    - FlutterMacOS
   - Superscript (0.2.8)
   - SuperwallKit (4.5.2):
     - Superscript (= 0.2.8)
@@ -50,6 +53,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - qonversion_flutter (from `.symlinks/plugins/qonversion_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - superwallkit_flutter (from `.symlinks/plugins/superwallkit_flutter/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
@@ -81,6 +85,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/qonversion_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
   superwallkit_flutter:
     :path: ".symlinks/plugins/superwallkit_flutter/ios"
   url_launcher_ios:
@@ -101,6 +107,7 @@ SPEC CHECKSUMS:
   qonversion_flutter: d55ac03001bfd265eae4a520ace37df41cc005d7
   QonversionSandwich: 1ac99e13f94254da2e7cec1c39814dca3c611db3
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   Superscript: 82dbb40f502823160e75503ebc1b6bac756a503d
   SuperwallKit: 520fd9dff39358c9708d88cc69c1f4fbd32b3008
   superwallkit_flutter: 24189eddf53053b67bb8a909556fca71140665c4

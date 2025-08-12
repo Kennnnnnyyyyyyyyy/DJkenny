@@ -49,6 +49,9 @@ dependencies:
   audio_visualizer: ^1.1.0
   superwallkit_flutter: ^2.4.0
   flutter_native_splash: ^2.4.6
+  rxdart: ^0.27.7
+  audio_session: ^0.1.18
+  cached_network_image: ^3.3.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,4 +1,11 @@
+// ignore_for_file: unused_element
 import 'package:flutter/material.dart';
+import 'package:music_app/services/explore_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:music_app/data/repo/music_repo.dart';
+import 'package:music_app/data/models/song.dart' as models;
 
 // Data Models
 class Playlist {
@@ -31,7 +38,7 @@ class Song {
   });
 }
 
-// Sample Data
+// Sample Data (kept for fallback/local demos)
 const List<Playlist> kSamplePlaylists = [
   Playlist(title: "Chill Vibes", trackCount: 24, artwork: "https://picsum.photos/160/160?random=1"),
   Playlist(title: "Workout Mix", trackCount: 18, artwork: "https://picsum.photos/160/160?random=2"),
@@ -63,6 +70,17 @@ class ExplorePage extends StatefulWidget {
 
 class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController _searchController = TextEditingController();
+  final ExploreService _svc = ExploreService();
+  final MusicRepo _repo = MusicRepo(Supabase.instance.client);
+  late Future<List<ExploreCover>> _coversFut;
+  late Future<List<models.Song>> _songsFut;
+
+  @override
+  void initState() {
+    super.initState();
+    _coversFut = _svc.fetchOnboardingCovers();
+    _songsFut = _repo.fetchExploreSongs(limit: 30);
+  }
 
   @override
   void dispose() {
@@ -74,6 +92,12 @@ class _ExplorePageState extends State<ExplorePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      floatingActionButton: kDebugMode
+          ? FloatingActionButton.small(
+              onPressed: _runBackfill,
+              child: const Icon(Icons.auto_awesome),
+            )
+          : null,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -81,102 +105,204 @@ class _ExplorePageState extends State<ExplorePage> {
             end: Alignment.bottomCenter,
             stops: [0.0, 0.6, 1.0],
             colors: [
-              Color(0xFF0E1018), // Nightfall start - very top
-              Color(0xFF20233B), // Mid-point around 60% down
-              Color(0xFF4A2D7C), // Neon end - bottom edge
+              Color(0xFF0E1018),
+              Color(0xFF20233B),
+              Color(0xFF4A2D7C),
             ],
           ),
         ),
-        child: CustomScrollView(
-          slivers: [
-            // Search Bar
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                child: _SearchBar(controller: _searchController),
-              ),
-            ),
+        child: FutureBuilder<List<ExploreCover>>(
+          future: _coversFut,
+          builder: (context, snap) {
+            if (snap.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator(color: Colors.white));
+            }
+            if (snap.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Failed to load covers', style: TextStyle(color: Colors.white)),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () => setState(() => _coversFut = _svc.fetchOnboardingCovers()),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-            // Playlists for you
-            SliverToBoxAdapter(
-              child: _SectionHeader(title: "Playlists for you"),
-            ),
-            SliverToBoxAdapter(
-              child: _HorizontalPlaylists(playlists: kSamplePlaylists),
-            ),
+            final covers = snap.data ?? const <ExploreCover>[];
+            final playlists = covers.take(12).toList(growable: false);
 
-            // New releases
-            SliverToBoxAdapter(
-              child: _SectionHeader(title: "New releases"),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _SongRow(song: kSampleNewReleases[index]),
-                childCount: kSampleNewReleases.length,
-              ),
-            ),
+            return FutureBuilder<List<models.Song>>(
+              future: _songsFut,
+              builder: (context, songsSnap) {
+                final songs = songsSnap.data ?? const <models.Song>[];
+                final newReleases = songs.take(10).toList(growable: false);
+                final popular = songs.skip(10).take(10).toList(growable: false);
 
-            // Summer Love Song Contest Winners
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: _ContestCard(),
-              ),
-            ),
-
-            // Best of Melo Song Contests
-            SliverToBoxAdapter(
-              child: _SectionHeader(title: "Best of Melo Song Contests"),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: 6,
-                  itemBuilder: (context, index) => Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: NetworkImage("https://picsum.photos/160/160?random=${30 + index}"),
-                        fit: BoxFit.cover,
+                return CustomScrollView(
+                  slivers: [
+                    // Search Bar
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                        child: _SearchBar(controller: _searchController),
                       ),
                     ),
-                  ),
-                ),
-              ),
-            ),
 
-            // Moods & Genres
-            SliverToBoxAdapter(
-              child: _SectionHeader(title: "Moods & Genres"),
-            ),
-            _GenresGrid(),
+                    // Playlists for you (from onboarding covers)
+                    SliverToBoxAdapter(child: _SectionHeader(title: "Playlists for you")),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 200,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: playlists.length,
+                          itemBuilder: (context, index) {
+                            final item = playlists[index];
+                            return _PlaylistCard(
+                              title: item.title,
+                              artworkUrl: item.coverUrl,
+                              trackCount: null,
+                              onTap: () {},
+                            );
+                          },
+                        ),
+                      ),
+                    ),
 
-            // Popular Weekly
-            SliverToBoxAdapter(
-              child: _SectionHeader(title: "Popular Weekly"),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _ChartRow(song: kSamplePopularWeekly[index]),
-                childCount: kSamplePopularWeekly.length,
-              ),
-            ),
+                    // New releases (songs table)
+                    SliverToBoxAdapter(child: _SectionHeader(title: "New releases")),
+                    if (songsSnap.connectionState != ConnectionState.done)
+                      const SliverToBoxAdapter(
+                        child: Center(child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = newReleases[index];
+                            return _SongRowNetwork(
+                              title: item.title ?? 'Untitled',
+                              subtitle: '',
+                              artworkUrl: item.coverUrl,
+                              onTap: () {},
+                            );
+                          },
+                          childCount: newReleases.length,
+                        ),
+                      ),
 
-            // Bottom padding
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+                    // Moods & Genres
+                    SliverToBoxAdapter(child: _SectionHeader(title: "Moods & Genres")),
+                    _GenresGrid(),
+
+                    // Popular Weekly (more from songs)
+                    SliverToBoxAdapter(child: _SectionHeader(title: "Popular Weekly")),
+                    if (songsSnap.connectionState != ConnectionState.done)
+                      const SliverToBoxAdapter(child: SizedBox(height: 60))
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = popular[index];
+                            return _SongRowNetwork(
+                              title: item.title ?? 'Untitled',
+                              subtitle: '',
+                              artworkUrl: item.coverUrl,
+                              onTap: () {},
+                            );
+                          },
+                          childCount: popular.length,
+                        ),
+                      ),
+
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                );
+              },
+            );
+          },
         ),
       ),
     );
   }
+
+  Future<void> _runBackfill() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Backfilling missing covers...')),
+    );
+    try {
+      final count = await _repo.backfillSongCovers(limit: 50);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Requested $count cover generations')),
+      );
+      setState(() {
+        _songsFut = _repo.fetchExploreSongs(limit: 30);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Backfill failed: $e')),
+      );
+    }
+  }
+}
+
+// Helper: album art with gradient fallback and caching
+Widget songArt(String? coverUrl, {double size = 60, double radius = 12}) {
+  if (coverUrl == null || coverUrl.isEmpty) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF23283B), Color(0xFF0F2233)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(radius),
+    child: CachedNetworkImage(
+      imageUrl: coverUrl,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      placeholder: (c, _) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF23283B), Color(0xFF0F2233)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      ),
+      errorWidget: (c, _, __) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F2233),
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.music_note, color: Colors.white54),
+      ),
+    ),
+  );
 }
 
 // Search Bar Widget
@@ -204,7 +330,7 @@ class _SearchBar extends StatelessWidget {
         ),
         onSubmitted: (query) {
           // TODO: Handle search query
-          print("Search query: $query");
+          debugPrint("Search query: $query");
         },
       ),
     );
@@ -242,39 +368,18 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// Horizontal Playlists Widget
-class _HorizontalPlaylists extends StatelessWidget {
-  final List<Playlist> playlists;
-
-  const _HorizontalPlaylists({required this.playlists});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: playlists.length,
-        itemBuilder: (context, index) => _PlaylistCard(playlist: playlists[index]),
-      ),
-    );
-  }
-}
-
 // Playlist Card Widget
 class _PlaylistCard extends StatelessWidget {
-  final Playlist playlist;
-
-  const _PlaylistCard({required this.playlist});
+  final String title;
+  final String? artworkUrl;
+  final int? trackCount;
+  final VoidCallback? onTap;
+  const _PlaylistCard({required this.title, required this.artworkUrl, this.trackCount, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Open playlist
-        print("Open playlist: ${playlist.title}");
-      },
+      onTap: onTap,
       child: Container(
         width: 160,
         margin: const EdgeInsets.only(right: 12),
@@ -283,44 +388,32 @@ class _PlaylistCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                      image: NetworkImage(playlist.artwork),
-                      fit: BoxFit.cover,
+                SizedBox(width: 160, height: 160, child: songArt(artworkUrl, size: 160, radius: 20)),
+                if (trackCount != null)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.music_note, color: Colors.white, size: 12),
+                          const SizedBox(width: 4),
+                          Text("$trackCount", style: const TextStyle(color: Colors.white, fontSize: 11)),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.music_note, color: Colors.white, size: 12),
-                        const SizedBox(width: 4),
-                        Text(
-                          "${playlist.trackCount}",
-                          style: const TextStyle(color: Colors.white, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              playlist.title,
+              title,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -336,41 +429,30 @@ class _PlaylistCard extends StatelessWidget {
   }
 }
 
-// Song Row Widget
-class _SongRow extends StatelessWidget {
-  final Song song;
-
-  const _SongRow({required this.song});
+// Song Row Widget (Network Images)
+class _SongRowNetwork extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String? artworkUrl;
+  final VoidCallback? onTap;
+  const _SongRowNetwork({required this.title, required this.subtitle, required this.artworkUrl, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Play song
-        print("Play song: ${song.title}");
-      },
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(song.artwork),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            songArt(artworkUrl, size: 60, radius: 8),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    song.title,
+                    title,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -379,38 +461,18 @@ class _SongRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    song.artist,
+                    subtitle,
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      _MiniIconText(
-                        icon: Icons.play_arrow,
-                        text: "${song.playCount}",
-                      ),
-                      const SizedBox(width: 16),
-                      _MiniIconText(
-                        icon: Icons.favorite,
-                        text: "${song.likeCount}",
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
             IconButton(
-              onPressed: () {
-                // TODO: Show context menu
-                print("Show context menu for: ${song.title}");
-              },
-              icon: const Icon(
-                Icons.more_vert,
-                color: Colors.white70,
-              ),
+              onPressed: () {},
+              icon: const Icon(Icons.more_vert, color: Colors.white70),
             ),
           ],
         ),
@@ -430,7 +492,7 @@ class _ChartRow extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // TODO: Play song
-        print("Play song: ${song.title}");
+        debugPrint("Play song: ${song.title}");
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -450,17 +512,7 @@ class _ChartRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(song.artwork),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            songArt(song.artwork, size: 60, radius: 8),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -577,22 +629,12 @@ class _ContestCard extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    image: DecorationImage(
-                      image: NetworkImage("https://picsum.photos/32/32?random=${101 + index}"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                songArt("https://picsum.photos/32/32?random=${101 + index}", size: 32, radius: 4),
                 const SizedBox(width: 8),
-                Expanded(
+                const Expanded(
                   child: Text(
-                    "Winner Song ${index + 1}",
-                    style: const TextStyle(
+                    "Winner Song",
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
@@ -610,7 +652,7 @@ class _ContestCard extends StatelessWidget {
                   label: "Play",
                   onTap: () {
                     // TODO: Play playlist
-                    print("Play contest playlist");
+                    debugPrint("Play contest playlist");
                   },
                 ),
               ),
@@ -621,7 +663,7 @@ class _ContestCard extends StatelessWidget {
                   label: "Add",
                   onTap: () {
                     // TODO: Add playlist
-                    print("Add contest playlist");
+                    debugPrint("Add contest playlist");
                   },
                 ),
               ),
@@ -697,7 +739,7 @@ class _GenresGrid extends StatelessWidget {
           (context, index) => GestureDetector(
             onTap: () {
               // TODO: Navigate to genre
-              print("Selected genre: ${genres[index]}");
+              debugPrint("Selected genre: ${genres[index]}");
             },
             child: Container(
               decoration: BoxDecoration(

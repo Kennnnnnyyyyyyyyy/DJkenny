@@ -9,7 +9,30 @@ class OnboardingService {
   final OnboardingRepo _repo = OnboardingRepo();
   final PlayerController _player = PlayerController();
 
-  /// Plays a track based on UI choice selections
+  /// New: Fetch a track based on UI choices WITHOUT auto-playing
+  Future<OnboardingTrack?> findTrackFromChoices({
+    required String moodUI,
+    required String genreUI,
+    required String topicUI,
+  }) async {
+    debugPrint('Finding track from choices (no autoplay): mood=$moodUI, genre=$genreUI, topic=$topicUI');
+
+    final mood = normalizeMood(moodUI);
+    final genre = normalizeGenre(genreUI);
+    final topic = normalizeTopic(topicUI);
+
+    if (!isValidPage3(mood, genre, topic)) {
+      throw ArgumentError('Invalid combination: mood=$mood, genre=$genre, topic=$topic');
+    }
+
+    final track = await _repo.getPage3Track(mood: mood, genre: genre, topic: topic);
+    if (track == null) {
+      throw StateError('Track not found for mood=$mood, genre=$genre, topic=$topic');
+    }
+    return track;
+  }
+
+  /// Plays a track based on UI choice selections (legacy behavior)
   Future<OnboardingTrack?> playFromChoices({
     required String moodUI,
     required String genreUI,

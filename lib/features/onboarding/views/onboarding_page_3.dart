@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../onboarding/onboarding_service.dart';
-import '../../../onboarding/choice_normalizers.dart';
+import 'package:music_app/ui/widgets/circular_album_player.dart';
+import 'package:music_app/data/repo/music_repo.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum MessageType {
   text,
@@ -56,10 +58,13 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   String _currentStep = "intro";
   String? _selectedMood, _selectedGenre, _selectedSubject;
   String? _currentSongUrl;
+  String? _currentCoverUrl; // album art for the created song
+  String? _currentTrackTitle; // optional server title
   bool _isSecondPaymentPrompt = false;
   bool _modalShown = false;
   bool _showPsychedelicBackground = false;
   bool _isProcessingChoice = false; // Flag to prevent multiple rapid clicks
+  final MusicRepo _musicRepo = MusicRepo(Supabase.instance.client);
 
   @override
   void initState() {
@@ -203,7 +208,18 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             ),
           ),
 
-          // Animated particles background
+          // Psychedelic Wave Visualizer (appears after song is created)
+          if (_showPsychedelicBackground)
+            Positioned.fill(
+              child: _PsychedelicWaveVisualizer(
+                audioPlayer: _player,
+                waveController: _waveController,
+                colorController: _colorController,
+                driftController: _driftController,
+              ),
+            ),
+
+          // Animated particles background (render above wave so it's always visible)
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _particleController,
@@ -217,17 +233,6 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               },
             ),
           ),
-
-          // Psychedelic Wave Visualizer (appears after song is created)
-          if (_showPsychedelicBackground)
-            Positioned.fill(
-              child: _PsychedelicWaveVisualizer(
-                audioPlayer: _player,
-                waveController: _waveController,
-                colorController: _colorController,
-                driftController: _driftController,
-              ),
-            ),
 
           // Dark scrim for better text readability
           Positioned.fill(
@@ -257,26 +262,47 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                   ),
                 ),
                 
-                // Chat messages area - takes most of the space
+                // Main area: either chat list or inline player when created
                 Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      return _buildMessage(_messages[index]);
-                    },
-                  ),
+                  child: (_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty))
+                      ? _buildInlinePlayer()
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            return _buildMessage(_messages[index]);
+                          },
+                        ),
                 ),
                 
-                // Bottom area for choice buttons
-                _buildBottomChoiceArea(),
+                // Bottom area for choice buttons (hidden while player showing)
+                if (!(_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty)))
+                  _buildBottomChoiceArea(),
                 
                 const SizedBox(height: 30),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInlinePlayer() {
+    final composedTitle = _currentTrackTitle ??
+        '${_selectedMood ?? ''} – ${_selectedGenre ?? ''} – ${_selectedSubject ?? ''}'.trim();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: CircularAlbumPlayer(
+        title: composedTitle.isEmpty ? 'Your track' : composedTitle,
+        subtitle: 'Melo AI',
+        audioUrl: _currentSongUrl!,
+        coverUrl: _currentCoverUrl ?? '',
+        onFinished: () {},
+        onNext: widget.onDone,
+        onPrev: () {},
       ),
     );
   }
@@ -548,110 +574,58 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   }
 
   Widget _buildSongCreatedMessage(ChatMessage message) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24.0),
-        margin: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: const Color(0x20FFFFFF),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0x30FFFFFF)),
+    // If URL not ready yet, show loading chip
+    if (_currentSongUrl == null || _currentSongUrl!.isEmpty) {
+      return Center(
+        child: Container(
+          padding: const EdgeInsets.all(20.0),
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: const Color(0x20FFFFFF),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(color: Color(0xFFFF6FD8)),
+              SizedBox(width: 16),
+              Text('Loading audio...', style: TextStyle(color: Colors.white)),
+            ],
+          ),
         ),
-        child: Column(
-          children: [
-            const Text(
-              "Song created.",
-              style: TextStyle(
-                color: Color(0xFF32D74B),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'SF Pro Display',
-              ),
-            ),
-            const SizedBox(height: 20),
-            RotationTransition(
-              turns: _discController,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFFF6FD8), Color(0xFF7A4BFF)], // Updated to match your theme
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.album,
-                  color: Colors.white,
-                  size: 50,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Born from Your Choices",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'SF Pro Display',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "A $_selectedMood ${_selectedGenre?.toLowerCase() ?? 'pop'} song for $_selectedSubject",
-              style: const TextStyle(
-                color: Color(0xFFBBBBBB),
-                fontSize: 14,
-                fontFamily: 'SF Pro Display',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            // Play/Pause button
-            StreamBuilder<bool>(
-              stream: _player.playingStream,
-              builder: (context, snapshot) {
-                bool isPlaying = snapshot.data ?? false;
-                return Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Pink to purple gradient
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _togglePlayPause(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                    label: Text(
-                      isPlaying ? "Pause" : "Play",
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'SF Pro Display',
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      );
+    }
+
+    final composedTitle = _currentTrackTitle ??
+        '${_selectedMood ?? ''} – ${_selectedGenre ?? ''} – ${_selectedSubject ?? ''}'.trim();
+
+    return CircularAlbumPlayer(
+      title: composedTitle,
+      subtitle: 'Melo AI',
+      audioUrl: _currentSongUrl!,
+      coverUrl: _currentCoverUrl ?? '',
+      onFinished: () {},
+      onNext: widget.onDone,
+      onPrev: () {
+        // Optional: go back
+      },
     );
+  }
+
+  Future<void> ensureCoverForTrack(String trackId, {String? mood, String? genre, String? topic, required String pageTag}) async {
+    try {
+      final prompt = 'Melo AI: \\${mood ?? ''} \\${genre ?? ''} • \\${(topic ?? '').replaceAll(RegExp(r'([a-z])([A-Z])'), r'$1 $2')}';
+      await _musicRepo.generateCover(
+        prompt: prompt,
+        pageTag: pageTag,
+        mood: mood,
+        genre: genre,
+        topic: topic,
+        trackId: trackId,
+      );
+    } catch (e) {
+      debugPrint('ensureCoverForTrack failed: $e');
+    }
   }
 
   void _handleChoice(String choice) {
@@ -796,16 +770,30 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         type: MessageType.creating,
       ));
       
-      // Fetch and play the track from Supabase
-      final track = await _onboardingService.playFromChoices(
-        moodUI: moodUI,
-        genreUI: genreUI,
-        topicUI: topicUI,
-      );
+      // Fetch and keep track details from Supabase
+      final track = await _onboardingService.findTrackFromChoices(
+         moodUI: moodUI,
+         genreUI: genreUI,
+         topicUI: topicUI,
+       );
       
       if (track != null) {
         print('🎵 Found track: ${track.title} - ${track.publicUrl}');
         _currentSongUrl = track.publicUrl;
+        _currentCoverUrl = track.coverUrl; // may be null
+        _currentTrackTitle = track.title;
+
+        // Fire-and-forget: ensure cover exists
+        if ((_currentCoverUrl == null || _currentCoverUrl!.isEmpty)) {
+          // Pass DB keys mood/genre/topic directly if available from repo
+          unawaited(ensureCoverForTrack(
+            track.id,
+            mood: track.mood,
+            genre: track.genre,
+            topic: track.topic,
+            pageTag: track.pageTag,
+          ));
+        }
         
         // Simulate creation time
         Timer(const Duration(seconds: 3), () {
@@ -840,16 +828,9 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 type: MessageType.songCreated,
               ));
               
-              // Automatically start playing the song
-              if (_currentSongUrl != null) {
-                _player.setUrl(_currentSongUrl!).then((_) {
-                  _player.play();
-                }).catchError((e) {
-                  print('Error auto-playing song: $e');
-                });
-              }
-              
-              // After song is created and playing for a few seconds, show upgrade flow
+              // Do not auto-play here; the CircularAlbumPlayer will handle playback.
+ 
+              // After a short delay, show upgrade flow (unchanged)
               Timer(const Duration(seconds: 5), () {
                 if (mounted) {
                   _showUpgradeFlow();
@@ -870,21 +851,6 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         isFromUser: false,
         type: MessageType.text,
       ));
-    }
-  }
-
-  Future<void> _togglePlayPause() async {
-    try {
-      if (_player.playing) {
-        await _player.pause();
-      } else {
-        if (_currentSongUrl != null) {
-          await _player.setUrl(_currentSongUrl!);
-          await _player.play();
-        }
-      }
-    } catch (e) {
-      print('Error playing audio: $e');
     }
   }
 
