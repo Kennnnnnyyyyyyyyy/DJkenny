@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 import '../../../onboarding/onboarding_service.dart';
 import 'package:music_app/ui/widgets/circular_album_player.dart';
 import 'package:music_app/data/repo/music_repo.dart';
@@ -69,6 +70,10 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   @override
   void initState() {
     super.initState();
+    
+    // Initialize audio session
+    _initAudio();
+    
     _discController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
@@ -112,6 +117,40 @@ class _OnboardingPage3State extends State<OnboardingPage3>
     _particleController.repeat();
 
     _startChat();
+  }
+
+  Future<void> _initAudio() async {
+    try {
+      debugPrint('🔧 [Page3] Initializing audio session...');
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      
+      // Set up audio interruption handling
+      session.interruptionEventStream.listen((event) {
+        if (event.begin) {
+          debugPrint('🔇 [Page3] Audio interruption began');
+          if (_player.playing) {
+            _player.pause();
+          }
+        } else {
+          debugPrint('🔊 [Page3] Audio interruption ended');
+        }
+      });
+      
+      // Log playback errors with more detail
+      _player.playbackEventStream.listen(
+        (event) {
+          debugPrint('🎵 [Page3] Playback event: ${event.processingState}');
+        }, 
+        onError: (Object e, StackTrace st) {
+          debugPrint('🔇 [Page3] just_audio error: $e');
+        }
+      );
+      
+      debugPrint('✅ [Page3] Audio session configured successfully');
+    } catch (e) {
+      debugPrint('⚠️ [Page3] Audio session init failed: $e');
+    }
   }
 
   @override

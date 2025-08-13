@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
+import 'package:music_app/router/router_constants.dart';
 import '../data/onboarding_data.dart';
-import '../../../features/onboarding/views/onboarding_page_3.dart';
 
 class SongPreview {
   final String title;
@@ -45,6 +46,8 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
     print('🎵 OnboardingPage2 initialized!');
     _pageController = PageController(viewportFraction: 0.75, initialPage: 0);
     _audioPlayer = AudioPlayer();
+
+    _initAudio(); // Configure audio session
     
     // Listen to player state changes
     _audioPlayer.playerStateStream.listen((state) {
@@ -60,8 +63,44 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
     _loadTracksFromSupabase();
   }
 
+  Future<void> _initAudio() async {
+    try {
+      debugPrint('🔧 Initializing audio session...');
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      
+      // Set up audio interruption handling
+      session.interruptionEventStream.listen((event) {
+        if (event.begin) {
+          debugPrint('🔇 Audio interruption began');
+          if (_isPlaying) {
+            _audioPlayer.pause();
+          }
+        } else {
+          debugPrint('🔊 Audio interruption ended');
+        }
+      });
+      
+      // Log playback errors with more detail
+      _audioPlayer.playbackEventStream.listen(
+        (event) {
+          debugPrint('🎵 Playback event: ${event.processingState}');
+        }, 
+        onError: (Object e, StackTrace st) {
+          debugPrint('🔇 just_audio error: $e');
+          debugPrint('Stack trace: $st');
+        }
+      );
+      
+      debugPrint('✅ Audio session configured successfully');
+    } catch (e) {
+      debugPrint('⚠️ Audio session init failed: $e');
+    }
+  }
+
   Future<void> _loadTracksFromSupabase() async {
     try {
+      debugPrint('🔍 Loading tracks from Supabase...');
       final tracks = await ref.read(page2TracksProvider.future);
       
       // Convert Supabase tracks to SongPreview format
@@ -72,6 +111,8 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
         coverImageUrl: "https://picsum.photos/300/300?random=${track.index}",
       )).toList();
       
+      debugPrint('✅ Loaded ${_previews.length} tracks');
+      
       if (mounted) {
         setState(() {
           // Triggers rebuild with new data
@@ -79,16 +120,42 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
         
         // Auto-play first song if available
         if (_previews.isNotEmpty) {
+          debugPrint('🎵 Auto-playing first track: ${_previews[0].title}');
           _loadAndPlaySong(0);
         }
       }
     } catch (e) {
-      print('❌ Error loading tracks from Supabase: $e');
-      // Fallback to empty list
+      debugPrint('❌ Error loading tracks from Supabase: $e');
+      
+      // Fallback to working sample tracks for testing
+      _previews = [
+        SongPreview(
+          title: 'Chill Vibes',
+          audioUrl: 'https://file-examples.com/storage/fe68c44f7d66f0e2619ac90/2017/11/file_example_MP3_700KB.mp3',
+          coverImageUrl: 'https://picsum.photos/300/300?random=1',
+        ),
+        SongPreview(
+          title: 'Upbeat Energy',
+          audioUrl: 'https://sample-music.netlify.app/death%20bed.mp3',
+          coverImageUrl: 'https://picsum.photos/300/300?random=2',
+        ),
+        SongPreview(
+          title: 'Ambient Flow',
+          audioUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+          coverImageUrl: 'https://picsum.photos/300/300?random=3',
+        ),
+      ];
+      
       if (mounted) {
         setState(() {
-          _previews = [];
+          // Triggers rebuild with fallback data
         });
+        
+        // Auto-play first fallback song
+        if (_previews.isNotEmpty) {
+          debugPrint('🎵 Playing fallback track: ${_previews[0].title}');
+          _loadAndPlaySong(0);
+        }
       }
     }
   }
@@ -115,23 +182,37 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
     if (index >= _previews.length) return;
     
     try {
-      // Don't show loading state for better UX during track switches
+      final track = _previews[index];
+      debugPrint('▶️ Loading track: ${track.title}');
+      debugPrint('🔗 URL: ${track.audioUrl}');
+      
+      setState(() => _isPlaying = false);
+      
       await _audioPlayer.stop();
-      await _audioPlayer.setUrl(_previews[index].audioUrl);
+      await _audioPlayer.setUrl(track.audioUrl);
+      
+      debugPrint('🎵 Starting playback...');
       await _audioPlayer.play();
       
-      // Update playing state after successful load
       if (mounted) {
-        setState(() {
-          _isPlaying = true;
-        });
+        setState(() => _isPlaying = true);
+        debugPrint('✅ Playback started successfully');
       }
     } catch (e) {
-      print('❌ Error loading song: $e');
+      debugPrint('❌ Error loading song: $e');
       if (mounted) {
-        setState(() {
-          _isPlaying = false;
-        });
+        setState(() => _isPlaying = false);
+      }
+      
+      // Show user-friendly error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unable to play audio. Please check your connection.'),
+            backgroundColor: Colors.red.withOpacity(0.8),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     }
   }
@@ -455,8 +536,8 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
                       child: InkWell(
                         borderRadius: BorderRadius.circular(32),
                         onTap: () {
-                          // Navigate to onboarding page 3 using GoRouter
-                          context.go('/onboarding3');
+                          debugPrint('👉 Try Now tapped');
+                          context.goNamed(RouterConstants.onboarding3);
                         },
                         child: Container(
                           alignment: Alignment.center,
@@ -486,7 +567,7 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.arrow_forward,
                                   size: 12,
                                   color: Color(0xFF3813C2),
