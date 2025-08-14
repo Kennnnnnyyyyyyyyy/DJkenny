@@ -65,6 +65,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   bool _modalShown = false;
   bool _showPsychedelicBackground = false;
   bool _isProcessingChoice = false; // Flag to prevent multiple rapid clicks
+  bool _upgradeFlowShown = false; // Flag to prevent duplicate upgrade flows
   final MusicRepo _musicRepo = MusicRepo(Supabase.instance.client);
 
   @override
@@ -303,7 +304,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 
                 // Main area: either chat list or inline player when created
                 Expanded(
-                  child: (_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty))
+                  child: (_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty) && _currentStep != 'upgrade')
                       ? _buildInlinePlayer()
                       : ListView.builder(
                           controller: _scrollController,
@@ -316,7 +317,7 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                 ),
                 
                 // Bottom area for choice buttons (hidden while player showing)
-                if (!(_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty)))
+                if (!(_currentStep == 'created' && (_currentSongUrl != null && _currentSongUrl!.isNotEmpty) && _currentStep != 'upgrade'))
                   _buildBottomChoiceArea(),
                 
                 const SizedBox(height: 30),
@@ -342,6 +343,29 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         onFinished: () {},
         onNext: widget.onDone,
         onPrev: () {},
+        onContinue: () {
+          debugPrint('CircularAlbumPlayer onContinue triggered');
+          // Handle like a choice button - manage state properly
+          if (_isProcessingChoice) {
+            debugPrint('🚫 Choice already processing, ignoring rapid tap');
+            return;
+          }
+          
+          // Set processing flag
+          _isProcessingChoice = true;
+          
+          // Clear the player and show upgrade flow
+          setState(() {
+            _currentStep = 'upgrade'; // Change step to show upgrade
+            _messages.clear();
+          });
+          
+          // Show upgrade flow after a brief delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            _showUpgradeFlow();
+            _isProcessingChoice = false; // Reset flag
+          });
+        },
       ),
     );
   }
@@ -648,6 +672,29 @@ class _OnboardingPage3State extends State<OnboardingPage3>
       onPrev: () {
         // Optional: go back
       },
+      onContinue: () {
+        debugPrint('CircularAlbumPlayer onContinue triggered (second instance)');
+        // Handle like a choice button - manage state properly
+        if (_isProcessingChoice) {
+          debugPrint('🚫 Choice already processing, ignoring rapid tap');
+          return;
+        }
+        
+        // Set processing flag
+        _isProcessingChoice = true;
+        
+        // Clear the player and show upgrade flow
+        setState(() {
+          _currentStep = 'upgrade'; // Change step to show upgrade
+          _messages.clear();
+        });
+        
+        // Show upgrade flow after a brief delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _showUpgradeFlow();
+          _isProcessingChoice = false; // Reset flag
+        });
+      },
     );
   }
 
@@ -894,6 +941,13 @@ class _OnboardingPage3State extends State<OnboardingPage3>
   }
 
   void _showUpgradeFlow() {
+    if (_upgradeFlowShown) {
+      debugPrint('_showUpgradeFlow: Already shown, skipping');
+      return;
+    }
+    
+    _upgradeFlowShown = true;
+    debugPrint('_showUpgradeFlow called');
     Future.delayed(const Duration(milliseconds: 1000), () {
       setState(() {
         _messages.clear();

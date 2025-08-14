@@ -22,6 +22,7 @@ class CircularAlbumPlayer extends StatefulWidget {
   final VoidCallback? onFinished;
   final VoidCallback? onNext;
   final VoidCallback? onPrev;
+  final VoidCallback? onContinue;
 
   const CircularAlbumPlayer({
     super.key,
@@ -33,6 +34,7 @@ class CircularAlbumPlayer extends StatefulWidget {
     this.onFinished,
     this.onNext,
     this.onPrev,
+    this.onContinue,
   });
 
   @override
@@ -100,19 +102,25 @@ class _CircularAlbumPlayerState extends State<CircularAlbumPlayer> with WidgetsB
     _player.seek(target);
   }
 
+  void _seekRelative(int seconds) {
+    final currentPosition = _player.position;
+    final newPosition = currentPosition + Duration(seconds: seconds);
+    final duration = _player.duration;
+    
+    if (duration != null) {
+      final clampedPosition = Duration(
+        milliseconds: newPosition.inMilliseconds.clamp(0, duration.inMilliseconds),
+      );
+      _player.seek(clampedPosition);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final processing = _player.processingState;
     final canControl = !_loading && !_hasError && processing != ProcessingState.loading && processing != ProcessingState.buffering;
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)],
-        ),
-      ),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -181,8 +189,8 @@ class _CircularAlbumPlayerState extends State<CircularAlbumPlayer> with WidgetsB
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: canControl ? widget.onPrev : null,
-                    icon: const Icon(Icons.skip_previous, color: Colors.white),
+                    onPressed: canControl ? () => _seekRelative(-5) : null,
+                    icon: const Icon(Icons.replay_5, color: Colors.white),
                     iconSize: 30,
                   ),
                   const SizedBox(width: 24),
@@ -217,33 +225,44 @@ class _CircularAlbumPlayerState extends State<CircularAlbumPlayer> with WidgetsB
                   ),
                   const SizedBox(width: 24),
                   IconButton(
-                    onPressed: canControl ? widget.onNext : null,
-                    icon: const Icon(Icons.skip_next, color: Colors.white),
+                    onPressed: canControl ? () => _seekRelative(5) : null,
+                    icon: const Icon(Icons.forward_5, color: Colors.white),
                     iconSize: 30,
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.favorite_border, color: Colors.white54),
-                  SizedBox(width: 24),
-                  Icon(Icons.shuffle, color: Colors.white54),
-                ],
-              ),
-
               const SizedBox(height: 16),
-              SizedBox(
+              Container(
                 width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF4AE2), Color(0xFF7A4BFF)], // Pink to purple gradient
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                ),
                 child: ElevatedButton(
-                  onPressed: _loading && !_hasError ? null : widget.onNext,
+                  onPressed: _loading && !_hasError ? null : () {
+                    debugPrint('Continue button pressed');
+                    if (widget.onContinue != null) {
+                      debugPrint('Calling onContinue callback');
+                      widget.onContinue!();
+                    } else if (widget.onNext != null) {
+                      debugPrint('Calling onNext callback');
+                      widget.onNext!();
+                    } else {
+                      debugPrint('No callback available');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF7A4BFF),
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                    shadowColor: Colors.transparent,
+                    elevation: 0,
                   ),
                   child: const Text('Continue', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
