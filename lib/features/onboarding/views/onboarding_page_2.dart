@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:music_app/router/router_constants.dart';
+import '../../../audio/audio_session_helper.dart';
 import '../data/onboarding_data.dart';
 
 class SongPreview {
@@ -66,8 +67,10 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
   Future<void> _initAudio() async {
     try {
       debugPrint('🔧 Initializing audio session...');
+      // Audio session is already configured globally in main.dart
+      // Just set up event listeners
+      
       final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.music());
       
       // Set up audio interruption handling
       session.interruptionEventStream.listen((event) {
@@ -189,6 +192,9 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
       setState(() => _isPlaying = false);
       
       await _audioPlayer.stop();
+      await ensurePlaybackSession();
+      await _audioPlayer.setVolume(1.0);
+      await _audioPlayer.setSpeed(1.0);
       await _audioPlayer.setUrl(track.audioUrl);
       
       debugPrint('🎵 Starting playback...');
@@ -222,6 +228,7 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
       if (_isPlaying) {
         await _audioPlayer.pause();
       } else {
+        await ensurePlaybackSession();
         await _audioPlayer.play();
       }
     } catch (e) {

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import '../widgets/gradient_cta_button.dart';
 import '../../../shared/widgets/animated_loading_overlay.dart';
@@ -303,7 +301,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ), // Close GestureDetector
     );
-  }
+  } // End of _buildAuthenticatedHomePage method
 
   /// Get page title based on current page index
   String _getPageTitle() {

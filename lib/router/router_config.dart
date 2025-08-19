@@ -31,6 +31,28 @@ Page<void> _buildPageWithTransition(Widget child, GoRouterState state) {
 
 final GoRouter _router = GoRouter(
   initialLocation: '/splash',
+  debugLogDiagnostics: true,
+  errorBuilder: (context, state) {
+    debugPrint('🚨 GoRouter Error: ${state.error}');
+    debugPrint('🚨 Attempted location: ${state.matchedLocation}');
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Navigation Error', style: TextStyle(fontSize: 20, color: Colors.red)),
+            const SizedBox(height: 16),
+            Text('Error: ${state.error}', textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/splash'),
+              child: const Text('Go to Splash'),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
   routes: [
         // ✅ Splash Screen (DJ image + MELO AI logo)
     GoRoute(
@@ -62,9 +84,10 @@ final GoRouter _router = GoRouter(
     // ✅ Onboarding Page 3 (AI-Powered Creativity)
     GoRoute(
       path: '/onboarding3',
-      name: 'onboarding3',
+      name: RouterConstants.onboarding3,
       pageBuilder: (context, state) => _buildPageWithTransition(OnboardingPage3(
         onDone: () {
+          debugPrint('🎯 OnboardingPage3 onDone called - navigating to home');
           // Navigate directly to home page
           context.go('/');
         },

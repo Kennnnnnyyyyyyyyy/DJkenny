@@ -360,8 +360,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
             _messages.clear();
           });
           
-          // Show upgrade flow after a brief delay
-          Future.delayed(const Duration(milliseconds: 500), () {
+          // Show upgrade flow immediately 
+          Future.delayed(const Duration(milliseconds: 100), () {
             _showUpgradeFlow();
             _isProcessingChoice = false; // Reset flag
           });
@@ -689,8 +689,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
           _messages.clear();
         });
         
-        // Show upgrade flow after a brief delay
-        Future.delayed(const Duration(milliseconds: 500), () {
+        // Show upgrade flow immediately
+        Future.delayed(const Duration(milliseconds: 100), () {
           _showUpgradeFlow();
           _isProcessingChoice = false; // Reset flag
         });
@@ -881,8 +881,8 @@ class _OnboardingPage3State extends State<OnboardingPage3>
           ));
         }
         
-        // Simulate creation time
-        Timer(const Duration(seconds: 3), () {
+        // Simulate creation time - longer delay to make it feel like AI is creating
+        Timer(const Duration(seconds: 8), () {
           if (mounted) {
             setState(() {
               _messages.clear();
@@ -948,20 +948,20 @@ class _OnboardingPage3State extends State<OnboardingPage3>
     
     _upgradeFlowShown = true;
     debugPrint('_showUpgradeFlow called');
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       setState(() {
         _messages.clear();
       });
       
       // Step 1: Upgrade prompt
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         _addMessage(ChatMessage(
           text: "Unlock Full Potential — here's what you get:",
           isFromUser: false,
           type: MessageType.text,
         ));
         
-        Future.delayed(const Duration(milliseconds: 800), () {
+        Future.delayed(const Duration(milliseconds: 200), () {
           _addMessage(ChatMessage(
             text: "",
             isFromUser: false,
@@ -1197,8 +1197,11 @@ class _OnboardingPage3State extends State<OnboardingPage3>
                   child: GestureDetector(
                     onTap: () {
                       Navigator.pop(modalContext);
-                      // Use parent context for GoRouter navigation
-                      parentContext.go('/');
+                      // Call the onDone callback properly
+                      debugPrint('🎯 OnboardingPage3: Close button - navigating to home');
+                      context.go('/');
+                      // Also call the callback for any cleanup
+                      widget.onDone();
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
@@ -1275,8 +1278,11 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(modalContext);
-                  // Use parent context for GoRouter navigation
-                  parentContext.go('/');
+                  // Call the onDone callback properly
+                  debugPrint('🎯 OnboardingPage3: Subscribe button - navigating to home');
+                  context.go('/');
+                  // Also call the callback for any cleanup
+                  widget.onDone();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -1302,8 +1308,11 @@ class _OnboardingPage3State extends State<OnboardingPage3>
               child: TextButton(
                 onPressed: () {
                   Navigator.pop(modalContext);
-                  // Use parent context for GoRouter navigation
-                  parentContext.go('/');
+                  // Call the onDone callback properly
+                  debugPrint('🎯 OnboardingPage3: Continue Free button - navigating to home');
+                  context.go('/');
+                  // Also call the callback for any cleanup
+                  widget.onDone();
                 },
                 child: const Text(
                   "Continue with Free Version",

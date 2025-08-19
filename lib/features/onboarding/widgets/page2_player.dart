@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../../audio/audio_session_helper.dart';
 import '../data/onboarding_data.dart';
 
 class Page2Player extends ConsumerStatefulWidget {
@@ -23,6 +24,8 @@ class _Page2PlayerState extends ConsumerState<Page2Player> {
   Future<void> _load() async {
     _tracks = await ref.read(page2TracksProvider.future);
     if (_tracks.isNotEmpty) {
+      // Ensure proper audio session before loading
+      await ensurePlaybackSession();
       await _player.setUrl(_tracks.first.url.toString());
     }
   }
@@ -33,6 +36,8 @@ class _Page2PlayerState extends ConsumerState<Page2Player> {
   Future<void> _skip(int dir) async {
     if (_tracks.isEmpty) return;
     _curr = (_curr + dir + _tracks.length) % _tracks.length;
+    // Ensure proper audio session before loading
+    await ensurePlaybackSession();
     await _player.setUrl(_tracks[_curr].url.toString());
     _player.play();
   }

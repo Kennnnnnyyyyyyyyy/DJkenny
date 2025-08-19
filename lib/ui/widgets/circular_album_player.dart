@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:audio_session/audio_session.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:music_app/audio/audio_session_helper.dart';
 
 class PositionData {
   final Duration position;
@@ -62,15 +62,18 @@ class _CircularAlbumPlayerState extends State<CircularAlbumPlayer> with WidgetsB
 
   Future<void> _setup() async {
     try {
-      final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.music());
+      // Re-activate iOS session in case another SDK overrode it
+      await ensurePlaybackSession();
+      await _player.setVolume(1.0);
+      debugPrint('🎧 Loading audio URL: ${widget.audioUrl}');
       await _player.setUrl(widget.audioUrl);
       if (widget.initialPos != null) {
         await _player.seek(widget.initialPos);
       }
       setState(() => _loading = false);
       // Auto-play once loaded
-      unawaited(_player.play());
+      debugPrint('▶️ Starting playback...');
+      await _player.play();
       _player.playbackEventStream.listen((event) {
         if (event.processingState == ProcessingState.completed) {
           widget.onFinished?.call();

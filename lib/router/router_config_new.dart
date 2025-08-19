@@ -5,6 +5,7 @@ import 'package:music_app/features/home/views/home_page.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_1.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_2.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_3.dart';
+import 'package:music_app/features/onboarding/views/onboarding_page_3_mvvm.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_4.dart';
 import 'package:music_app/router/router_constants.dart';
 
@@ -51,7 +52,17 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/onboarding3',
       name: 'onboarding3',
-      builder: (context, state) => const OnboardingPage3(),
+      builder: (context, state) => OnboardingPage3(
+        onDone: () => context.go('/onboarding4'),
+      ),
+    ),
+    // ✅ Onboarding Page 3 MVVM (Testing)
+    GoRoute(
+      path: '/onboarding3-mvvm',
+      name: 'onboarding3-mvvm',
+      builder: (context, state) => OnboardingPage3MVVM(
+        onDone: () => context.go('/onboarding4'),
+      ),
     ),
     // ✅ Onboarding Page 4 (Ready to Create)
     GoRoute(
@@ -63,4 +74,5 @@ final GoRouter _router = GoRouter(
   ],
 );
 
-GoRouter get router => _router;
+// Export with different name to avoid conflicts
+GoRouter get routerNew => _router;
