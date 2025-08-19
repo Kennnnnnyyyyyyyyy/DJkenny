@@ -8,7 +8,6 @@ import '../../../onboarding/onboarding_service.dart';
 import 'package:music_app/ui/widgets/circular_album_player.dart';
 import 'package:music_app/data/repo/music_repo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:music_app/router/router_constants.dart';
 
 enum MessageType {
   text,
@@ -346,8 +345,26 @@ class _OnboardingPage3State extends State<OnboardingPage3>
         onPrev: () {},
         onContinue: () {
           debugPrint('CircularAlbumPlayer onContinue triggered');
-          // Navigate to OnboardingPage4 for upgrade flow
-          context.goNamed(RouterConstants.onboarding4);
+          // Handle like a choice button - manage state properly
+          if (_isProcessingChoice) {
+            debugPrint('🚫 Choice already processing, ignoring rapid tap');
+            return;
+          }
+          
+          // Set processing flag
+          _isProcessingChoice = true;
+          
+          // Clear the player and show upgrade flow
+          setState(() {
+            _currentStep = 'upgrade'; // Change step to show upgrade
+            _messages.clear();
+          });
+          
+          // Show upgrade flow immediately 
+          Future.delayed(const Duration(milliseconds: 100), () {
+            _showUpgradeFlow();
+            _isProcessingChoice = false; // Reset flag
+          });
         },
       ),
     );
@@ -657,8 +674,26 @@ class _OnboardingPage3State extends State<OnboardingPage3>
       },
       onContinue: () {
         debugPrint('CircularAlbumPlayer onContinue triggered (second instance)');
-        // Navigate to OnboardingPage4 for upgrade flow
-        context.goNamed(RouterConstants.onboarding4);
+        // Handle like a choice button - manage state properly
+        if (_isProcessingChoice) {
+          debugPrint('🚫 Choice already processing, ignoring rapid tap');
+          return;
+        }
+        
+        // Set processing flag
+        _isProcessingChoice = true;
+        
+        // Clear the player and show upgrade flow
+        setState(() {
+          _currentStep = 'upgrade'; // Change step to show upgrade
+          _messages.clear();
+        });
+        
+        // Show upgrade flow immediately
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _showUpgradeFlow();
+          _isProcessingChoice = false; // Reset flag
+        });
       },
     );
   }
@@ -926,36 +961,27 @@ class _OnboardingPage3State extends State<OnboardingPage3>
           type: MessageType.text,
         ));
         
-        // Step 1.5: Additional descriptive paragraph
-        Future.delayed(const Duration(milliseconds: 400), () {
+        Future.delayed(const Duration(milliseconds: 200), () {
           _addMessage(ChatMessage(
-            text: "Transform your music experience with premium AI features designed to unleash your creativity and bring your musical vision to life.",
+            text: "",
             isFromUser: false,
-            type: MessageType.text,
+            type: MessageType.upgrade,
           ));
           
-          Future.delayed(const Duration(milliseconds: 300), () {
+          // Step 2: Ask how it sounds
+          Future.delayed(const Duration(milliseconds: 2000), () {
             _addMessage(ChatMessage(
-              text: "",
+              text: "How does it sound?",
               isFromUser: false,
-              type: MessageType.upgrade,
+              type: MessageType.text,
             ));
             
-            // Step 2: Ask how it sounds
-            Future.delayed(const Duration(milliseconds: 2000), () {
+            Future.delayed(const Duration(milliseconds: 800), () {
               _addMessage(ChatMessage(
-                text: "How does it sound?",
+                text: "",
                 isFromUser: false,
-                type: MessageType.text,
+                type: MessageType.payment,
               ));
-              
-              Future.delayed(const Duration(milliseconds: 800), () {
-                _addMessage(ChatMessage(
-                  text: "",
-                  isFromUser: false,
-                  type: MessageType.payment,
-                ));
-              });
             });
           });
         });

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:music_app/features/home/views/home_page.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_1.dart';
 import 'package:music_app/features/onboarding/views/onboarding_page_2.dart';
-import 'package:music_app/features/onboarding/views/onboarding_page_3.dart';
+import '../features/onboarding/views/onboarding_page_3.dart';
+import '../features/onboarding/views/onboarding_page_4.dart';
 import 'package:music_app/features/onboarding/views/onboarding_screen.dart';
 import 'package:music_app/router/router_constants.dart';
 
@@ -81,13 +82,25 @@ final GoRouter _router = GoRouter(
       name: RouterConstants.onboarding2,
       pageBuilder: (context, state) => _buildPageWithTransition(const OnboardingPage2(), state),
     ),
-    // ✅ Onboarding Page 3 (AI-Powered Creativity)
+    // ✅ Onboarding Page 3 (AI-Powered Creativity) - MVVM Version
     GoRoute(
       path: '/onboarding3',
       name: RouterConstants.onboarding3,
       pageBuilder: (context, state) => _buildPageWithTransition(OnboardingPage3(
         onDone: () {
           debugPrint('🎯 OnboardingPage3 onDone called - navigating to home');
+          // Navigate directly to home page
+          context.go('/');
+        },
+      ), state),
+    ),
+    // ✅ Onboarding Page 4 (Upgrade Flow)
+    GoRoute(
+      path: '/onboarding4',
+      name: RouterConstants.onboarding4,
+      pageBuilder: (context, state) => _buildPageWithTransition(OnboardingPage4(
+        onDone: () {
+          debugPrint('🎯 OnboardingPage4 onDone called - navigating to home');
           // Navigate directly to home page
           context.go('/');
         },

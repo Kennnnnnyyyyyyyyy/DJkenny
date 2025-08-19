@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:music_app/router/router_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../audio/audio_session_helper.dart';
 import '../data/onboarding_data.dart';
 
@@ -39,6 +41,11 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
   bool _isPlaying = false;
   bool _isAppActive = true;
   List<SongPreview> _previews = []; // Now loaded from Supabase
+  
+  // Supabase fields for covers
+  final _sb = Supabase.instance.client;
+  bool _loading = true;
+  List<Map<String, dynamic>> _songs = [];
 
   @override
   void initState() {
@@ -49,6 +56,7 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
     _audioPlayer = AudioPlayer();
 
     _initAudio(); // Configure audio session
+    _loadCovers(); // Load album covers from Supabase
     
     // Listen to player state changes
     _audioPlayer.playerStateStream.listen((state) {
@@ -110,8 +118,8 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
       _previews = tracks.map((track) => SongPreview(
         title: track.title,
         audioUrl: track.url.toString(),
-        // Generate placeholder cover images (you can replace with actual cover URLs from your table)
-        coverImageUrl: "https://picsum.photos/300/300?random=${track.index}",
+        // Use actual cover URLs from Supabase instead of placeholders
+        coverImageUrl: track.coverUrl ?? "https://picsum.photos/300/300?random=${track.index}",
       )).toList();
       
       debugPrint('✅ Loaded ${_previews.length} tracks');
@@ -161,6 +169,71 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
         }
       }
     }
+  }
+
+  Future<void> _loadCovers() async {
+    try {
+      final res = await _sb
+          .from('songs') // table name
+          .select('id,title,cover_url,onboarding_index')
+          .inFilter('onboarding_index', [1, 2, 3]) // the three page-2 items
+          .order('onboarding_index');
+      setState(() {
+        _songs = (res as List).cast<Map<String, dynamic>>();
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading covers: $e');
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Widget _coversRow() {
+    if (_loading) {
+      return const SizedBox(
+        height: 140, 
+        child: Center(child: CircularProgressIndicator())
+      );
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: _songs.map((row) {
+        final url = row['cover_url'] as String?;
+        final title = row['title'] as String?;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                width: 110,
+                height: 110,
+                child: url == null
+                    ? Container(color: const Color(0xFF222222)) // fallback if still null
+                    : CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(color: const Color(0xFF222222)),
+                        errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title ?? 'Track',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        );
+      }).toList(),
+    );
   }
 
   @override
@@ -521,6 +594,28 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
 
                 const SizedBox(height: 16),
 
+                // Album Covers Preview Section
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Featured Albums',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _coversRow(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
                 // CTA Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
@@ -634,29 +729,56 @@ class _OnboardingPage2State extends ConsumerState<OnboardingPage2> with WidgetsB
                 borderRadius: BorderRadius.circular(cardSize / 2), // Perfect circle
                 child: Container(
                   color: Color(0xFF1D1E24),
-                  child: Image.network(
-                    preview.coverImageUrl,
-                    fit: BoxFit.cover,
-                    width: cardSize,
-                    height: cardSize,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF6FD8), Color(0xFF3813C2)],
+                  child: preview.coverImageUrl.startsWith('http')
+                      ? CachedNetworkImage(
+                          imageUrl: preview.coverImageUrl,
+                          fit: BoxFit.cover,
+                          width: cardSize,
+                          height: cardSize,
+                          placeholder: (context, url) => Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF6FD8), Color(0xFF3813C2)],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.music_note,
-                            color: Colors.white,
-                            size: 60,
+                          errorWidget: (context, url, error) => Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF6FD8), Color(0xFF3813C2)],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.music_note,
+                                color: Colors.white,
+                                size: 60,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF6FD8), Color(0xFF3813C2)],
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.music_note,
+                              color: Colors.white,
+                              size: 60,
+                            ),
                           ),
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ),

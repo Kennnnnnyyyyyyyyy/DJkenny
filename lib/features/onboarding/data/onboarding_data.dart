@@ -5,10 +5,13 @@ class Track {
   final int index;
   final String title;
   final Uri url;
+  final String? coverUrl;
+  
   Track.fromJson(Map<String, dynamic> j)
       : index = j['list_index'],
         title = j['title'],
-        url   = Uri.parse(j['public_url']);
+        url   = Uri.parse(j['public_url']),
+        coverUrl = j['cover_url'] as String?;
 }
 
 final page2TracksProvider = FutureProvider<List<Track>>((ref) async {
