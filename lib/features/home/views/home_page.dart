@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/widgets/ai_lyrics_button.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import '../widgets/gradient_cta_button.dart';
 import '../../../shared/widgets/animated_loading_overlay.dart';
@@ -654,6 +655,11 @@ class _HomePageState extends State<HomePage> {
               hintStyle: TextStyle(color: Colors.grey, fontFamily: 'Manrope'),
             ),
           ),
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: AiLyricsButton(controller: lyricsController),
         ),
         const SizedBox(height: 20),
 
