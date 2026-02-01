@@ -13,6 +13,7 @@ Melo AI provides an end-to-end music creation experience, from onboarding to son
 ## Core Features
 
 ### Guided Song Creation
+![Onboarding flow](MeloAI/onboarding.PNG)
 Users are taken through a structured onboarding flow that captures creative intent:
 - Mood selection (e.g. Happy, Chill, Motivational)
 - Genre selection (e.g. Pop, Rock, Rap, K-Pop)
