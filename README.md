@@ -13,7 +13,10 @@ Melo AI provides an end-to-end music creation experience, from onboarding to son
 ## Core Features
 
 ### Guided Song Creation
-![Onboarding flow](MeloAI/onboarding.PNG)
+<p align="center">
+  <img src="MeloAI/onboarding.PNG" width="300" alt="Onboarding flow" />
+</p>
+
 Users are taken through a structured onboarding flow that captures creative intent:
 - Mood selection (e.g. Happy, Chill, Motivational)
 - Genre selection (e.g. Pop, Rock, Rap, K-Pop)
@@ -48,14 +51,35 @@ These inputs are compiled into a structured prompt for AI music generation.
 ---
 
 ## Application Flow
-
+<p align="center">
+  <img src="MeloAI/home-screen.PNG" width="300" alt="Home screen" />
+</p>
 1. Welcome and onboarding
+<p align="center">
+  <img src="MeloAI/mood-selection.PNG" width="300" alt="Mood selection" />
+</p>
+
 2. Mood selection
+<p align="center">
+  <img src="MeloAI/genre-selection.PNG" width="300" alt="Genre selection" />
+</p>
 3. Genre selection
+<p align="center">
+  <img src="MeloAI/song-selection.PNG" width="300" alt="Song theme selection" />
+</p>
 4. Song theme selection
+<p align="center">
+  <img src="MeloAI/player.PNG" width="300" alt="Music player" />
+</p>
 5. AI song generation
+<p align="center">
+  <img src="MeloAI/player.PNG" width="300" alt="Music player" />
+</p>
 6. Playback and user feedback
 7. Subscription upgrade (optional)
+<p align="center">
+  <img src="MeloAI/explore.PNG" width="300" alt="Explore screen" />
+</p>
 8. Explore and library access
 
 This flow minimizes friction for new users while progressively introducing advanced functionality.
