@@ -1,4 +1,4 @@
-# Melo AI - MUSIC APP
+# Melo AI - MUSIC GENERATION APP
 
 Melo AI is an AI-powered music generation application that enables users to create personalized songs through a guided, conversational workflow. Users define mood, genre, and theme, and the platform generates complete music tracks using advanced AI models. The app is designed for scalability, performance, and long-term maintainability using a clean MVVM architecture and a cloud-native backend.
 
