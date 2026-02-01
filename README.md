@@ -73,7 +73,7 @@ These inputs are compiled into a structured prompt for AI music generation.
 </p>
 5. AI song generation
 <p align="center">
-  <img src="MeloAI/player.PNG" width="300" alt="Music player" />
+  <img src="MeloAI/premium.PNG" width="300" alt="Music player" />
 </p>
 6. Playback and user feedback
 7. Subscription upgrade (optional)
