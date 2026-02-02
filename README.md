@@ -75,12 +75,11 @@ These inputs are compiled into a structured prompt for AI music generation.
 <p align="center">
   <img src="MeloAI/premium.PNG" width="300" alt="Music player" />
 </p>
-6. Playback and user feedback
-7. Subscription upgrade (optional)
+6. Subscription upgrade (optional)
 <p align="center">
   <img src="MeloAI/explore.PNG" width="300" alt="Explore screen" />
 </p>
-8. Explore and library access
+7. Explore and library access
 
 This flow minimizes friction for new users while progressively introducing advanced functionality.
 
