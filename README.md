@@ -91,6 +91,9 @@ These inputs are compiled into a structured prompt for AI music generation.
   <img src="MeloAI/premium.PNG" width="300" alt="Music player" />
 </p>
 6. Subscription upgrade (optional)
+
+---
+
 <p align="center">
   <img src="MeloAI/explore.PNG" width="300" alt="Explore screen" />
 </p>
