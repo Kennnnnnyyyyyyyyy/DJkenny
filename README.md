@@ -70,6 +70,9 @@ These inputs are compiled into a structured prompt for AI music generation.
   <img src="MeloAI/genre-selection.PNG" width="300" alt="Genre selection" />
 </p>
 3. Genre selection
+
+---
+
 <p align="center">
   <img src="MeloAI/song-selection.PNG" width="300" alt="Song theme selection" />
 </p>
