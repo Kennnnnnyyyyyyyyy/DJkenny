@@ -63,6 +63,9 @@ These inputs are compiled into a structured prompt for AI music generation.
 </p>
 
 2. Mood selection
+
+   ---
+   
 <p align="center">
   <img src="MeloAI/genre-selection.PNG" width="300" alt="Genre selection" />
 </p>
