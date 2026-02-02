@@ -55,6 +55,9 @@ These inputs are compiled into a structured prompt for AI music generation.
   <img src="MeloAI/home-screen.PNG" width="300" alt="Home screen" />
 </p>
 1. Welcome and onboarding
+
+---
+
 <p align="center">
   <img src="MeloAI/mood-selection.PNG" width="300" alt="Mood selection" />
 </p>
