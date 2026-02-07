@@ -159,7 +159,7 @@ Melo AI follows a strict Model–View–ViewModel (MVVM) architecture to ensure 
 
 ## License
 
-MIT License © 2026 Kenny  
+MIT License © 2026 Kennnnnnyyyyyyyyy
 See the [LICENSE](./LICENSE) file for full license text.
 
 
