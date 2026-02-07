@@ -129,7 +129,7 @@ Melo AI follows a strict Model–View–ViewModel (MVVM) architecture to ensure 
 └────────────▲─────────────┘
              │ UI State
 ┌────────────┴─────────────┐
-│        ViewModel          │
+│        ViewModel         │
 │                          │
 │  - Business Logic        │
 │  - User Intent Handling  │
@@ -142,8 +142,8 @@ Melo AI follows a strict Model–View–ViewModel (MVVM) architecture to ensure 
 │                          │
 │  - Song Metadata         │
 │  - Audio References      │
-│  - User Preferences     │
-│  - Subscription State   │
+│  - User Preferences      │
+│  - Subscription State    │
 └────────────▲─────────────┘
              │
 ┌────────────┴─────────────┐
