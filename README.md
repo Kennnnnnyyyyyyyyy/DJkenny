@@ -154,7 +154,7 @@ Melo AI follows a strict Model–View–ViewModel (MVVM) architecture to ensure 
 │  - Storage and Auth      │
 │  - Payments              │
 └──────────────────────────┘
-
+```
 ---
 
 ## License
